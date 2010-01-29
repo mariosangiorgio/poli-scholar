@@ -17,5 +17,8 @@
 	<classpathentry kind="lib" path="/Users/mariosangiorgio/Documents/Projects/Eclipse workspace/lib/hibernate-distribution-3.3.2.GA/lib/required/slf4j-api-1.5.8.jar"/>
 	<classpathentry kind="lib" path="/Users/mariosangiorgio/Documents/Projects/Eclipse workspace/lib/mysql-connector-java-5.1.11/mysql-connector-java-5.1.11-bin.jar"/>
 	<classpathentry kind="lib" path="/Users/mariosangiorgio/Documents/Projects/Eclipse workspace/lib/slf4j-1.5.8/slf4j-simple-1.5.8.jar"/>
+	<classpathentry kind="lib" path="/Users/mariosangiorgio/Documents/Projects/Eclipse workspace/lib/hibernate-annotations-3.4.0.GA/hibernate-annotations.jar"/>
+	<classpathentry kind="lib" path="/Users/mariosangiorgio/Documents/Projects/Eclipse workspace/lib/hibernate-annotations-3.4.0.GA/lib/ejb3-persistence.jar"/>
+	<classpathentry kind="lib" path="/Users/mariosangiorgio/Documents/Projects/Eclipse workspace/lib/hibernate-annotations-3.4.0.GA/lib/hibernate-commons-annotations.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
