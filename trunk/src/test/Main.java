@@ -37,11 +37,15 @@ public class Main {
 			return;
 		}
 		
+		ieeeCrawler.getPaperData("http://ieeexplore.ieee.org/xpls/abs_all.jsp?isnumber=5401361&arnumber=5196681&count=11&index=3");
+		
+		/*
 		for(String issue:ieeeCrawler.getYearIssuesList(32,2009)){
 			for(String paper:ieeeCrawler.getPaperOfAnIssue(issue)){
 				System.out.println(paper);
 			}
 		}
+		*/
 	}
 
 }
