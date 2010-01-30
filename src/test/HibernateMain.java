@@ -33,6 +33,7 @@ public class HibernateMain {
 		session.save(article);
 		session.save(author2);
 		session.save(article2);
+		
 		session.getTransaction().commit();
 		System.out.println("Done");
 	}

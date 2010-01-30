@@ -25,11 +25,11 @@ public abstract class JournalCrawler {
 		downloader.setupProxyWithCredentials(proxyHostname, proxyPort, username, password);
 	}
 	
-	abstract public void testConnection() throws Exception;
+	public abstract void testConnection() throws Exception;
 	
-	abstract public Collection<String> getYearIssuesList(int journalIdentifier, int year);
+	public abstract Collection<String> getYearIssuesList(int journalIdentifier, int year);
 	
-	abstract public Collection<String> getPaperOfAnIssue(String issueAddress);
+	public abstract Collection<String> getPaperOfAnIssue(String issueAddress);
 	
-	//public void getPaperData(String paperAddress); //TODO: implement
+	public abstract void getPaperData(String paperAddress);
 }
