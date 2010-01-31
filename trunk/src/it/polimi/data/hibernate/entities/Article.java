@@ -5,27 +5,29 @@ import java.util.Vector;
 
 import javax.persistence.*;
 
+import org.hibernate.annotations.Type;
+
 @Entity
 @Table(name = "ARTICLES")
 public class Article {
-	@Id @GeneratedValue
+	@Id
+	@GeneratedValue
 	@Column(name = "ArticleId")
 	private long identifier;
 	
 	private String title;
+	
+	@Type(type = "text")
 	private String articleAbstract;
 	
-	
+	private int year;
+
+	@Lob
+	private byte[] fullTextPdf;
+
 	@ManyToMany
-    @JoinTable(name = "Article_Author",
-                    joinColumns = { @JoinColumn(name = "ArticleId")},
-                    inverseJoinColumns = { @JoinColumn(name = "AuthorId") })
+	@JoinTable(name = "Article_Author", joinColumns = { @JoinColumn(name = "ArticleId") }, inverseJoinColumns = { @JoinColumn(name = "AuthorId") })
 	private List<Author> authors = new Vector<Author>();
-	
-	public Article(String title, String articleAbstract) {
-		this.setTitle(title);
-		this.setArticleAbstract(articleAbstract);
-	}
 
 	@SuppressWarnings("unused")
 	private void setIdentifier(long identifier) {
@@ -62,6 +64,22 @@ public class Article {
 
 	public void addAuthor(Author author) {
 		authors.add(author);
+	}
+
+	public void setFullTextPdf(byte[] fullTextPdf) {
+		this.fullTextPdf = fullTextPdf;
+	}
+
+	public byte[] getFullTextPdf() {
+		return fullTextPdf;
+	}
+
+	public void setYear(int year) {
+		this.year = year;
+	}
+
+	public int getYear() {
+		return year;
 	}
 
 }

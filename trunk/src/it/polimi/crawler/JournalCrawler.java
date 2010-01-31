@@ -1,35 +1,63 @@
 package it.polimi.crawler;
 
-import it.polimi.webClient.PageDownloader;
-
+import it.polimi.data.hibernate.HibernateUtil;
+import it.polimi.data.hibernate.entities.Article;
+import it.polimi.webClient.ContentDownloader;
 import java.util.Collection;
-
 import org.apache.http.HttpHost;
+import org.hibernate.Session;
 
+/**
+ * Generic class for a Journal Crawler.
+ * Subclasses must provide the actual implementation
+ * to access a data source.
+ * 
+ * @author Mario Sangiorgio
+ */
 public abstract class JournalCrawler {
-	protected PageDownloader downloader;
-	protected HttpHost targetHost;
+	protected String			journalName;
+	protected String			journalIdentifier;
 	
-	protected JournalCrawler(HttpHost targetHost){
-		downloader = new PageDownloader();
+	protected ContentDownloader downloader;
+	protected HttpHost			targetHost;
+	protected Session			session;
+	
+	protected JournalCrawler(String journalName, String journalIdentifier, HttpHost targetHost){
+		this.journalIdentifier = journalIdentifier;
+		this.journalName	   = journalName;
+		downloader = new ContentDownloader();
 		this.targetHost = targetHost;
+		session = HibernateUtil.getSessionFactory().getCurrentSession();
 	}
 	
-	protected JournalCrawler(HttpHost targetHost, String proxyHostname, int proxyPort){
-		this(targetHost);
+	protected JournalCrawler(String journalName, String journalIdentifier, HttpHost targetHost,
+							 String proxyHostname, int proxyPort){
+		this(journalName, journalIdentifier, targetHost);
 		downloader.setupProxy(proxyHostname, proxyPort);
 	}
 	
-	protected JournalCrawler(HttpHost targetHost, String proxyHostname, int proxyPort, String username, String password){
-		this(targetHost);
+	protected JournalCrawler(String journalName, String journalIdentifier, HttpHost targetHost,
+							 String proxyHostname, int proxyPort, String username, String password){
+		this(journalName, journalIdentifier, targetHost);
 		downloader.setupProxyWithCredentials(proxyHostname, proxyPort, username, password);
 	}
 	
+	/**
+	 * Method to test if the connection to the data source is working properly.
+	 * 
+	 * @throws Exception that specifies the error encountered.
+	 */
 	public abstract void testConnection() throws Exception;
 	
-	public abstract Collection<String> getYearIssuesList(int journalIdentifier, int year);
+	/**
+	 * Crawls the data source and fills the database with the collected data
+	 * 
+	 * @param journalIdentifier a string that identifies the journal.
+	 * @param year the year of the publication.
+	 */
+	public abstract void getYearArticles(int year);
 	
 	public abstract Collection<String> getPaperOfAnIssue(String issueAddress);
 	
-	public abstract void getPaperData(String paperAddress);
+	public abstract Article getPaperData(String paperAddress);
 }

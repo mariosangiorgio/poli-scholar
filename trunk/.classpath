@@ -20,5 +20,7 @@
 	<classpathentry kind="lib" path="/Users/mariosangiorgio/Documents/Projects/Eclipse workspace/lib/hibernate-annotations-3.4.0.GA/hibernate-annotations.jar"/>
 	<classpathentry kind="lib" path="/Users/mariosangiorgio/Documents/Projects/Eclipse workspace/lib/hibernate-annotations-3.4.0.GA/lib/ejb3-persistence.jar"/>
 	<classpathentry kind="lib" path="/Users/mariosangiorgio/Documents/Projects/Eclipse workspace/lib/hibernate-annotations-3.4.0.GA/lib/hibernate-commons-annotations.jar"/>
+	<classpathentry kind="lib" path="/Users/mariosangiorgio/Documents/Projects/Eclipse workspace/lib/commons-lang-2.4/commons-lang-2.4.jar"/>
+	<classpathentry kind="lib" path="/Users/mariosangiorgio/Documents/Projects/Eclipse workspace/lib/pdfbox-0.8.0-incubating.jar.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -21,11 +21,11 @@ public class Main {
 			String username		= args[0];
 			String password		= args[1];
 			System.out.println("Using the provided username and password for the proxy");
-			ieeeCrawler = new IEEECrawler(proxyHostname,proxyPort,username,password);
+			ieeeCrawler = new IEEECrawler("TSE", "32", proxyHostname, proxyPort, username, password);
 		}
 		else{
 			System.out.println("No proxy login information provided");
-			ieeeCrawler = new IEEECrawler(proxyHostname, proxyPort);
+			ieeeCrawler = new IEEECrawler("TSE", "32", proxyHostname, proxyPort);
 		}
 		
 		try {
@@ -37,7 +37,9 @@ public class Main {
 			return;
 		}
 		
-		ieeeCrawler.getPaperData("http://ieeexplore.ieee.org/xpls/abs_all.jsp?isnumber=5401361&arnumber=5196681&count=11&index=3");
+		ieeeCrawler.getYearArticles(2010);
+		
+		//ieeeCrawler.getPaperData("http://ieeexplore.ieee.org/xpls/abs_all.jsp?isnumber=5401361&arnumber=5196681&count=11&index=3");
 		
 		/*
 		for(String issue:ieeeCrawler.getYearIssuesList(32,2009)){
