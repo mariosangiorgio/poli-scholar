@@ -14,11 +14,11 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
-public class PageDownloader {
+public class ContentDownloader {
 	private DefaultHttpClient client;
 	private static final int SLEEP_AFTER_REQUEST = 5*1000;
 	
-	public PageDownloader(){
+	public ContentDownloader(){
 		client = new DefaultHttpClient();
 	}
 	
@@ -34,7 +34,7 @@ public class PageDownloader {
                 new UsernamePasswordCredentials(username, password));
 	}
 	
-	public String getPage(HttpHost targetHost, String content) throws DownloadException, IOException{
+	private HttpEntity getContent(HttpHost targetHost, String content) throws DownloadException, IOException{
 		HttpGet request = new HttpGet(content);
         request.setHeader(HTTP.USER_AGENT,"Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_1; en-us) AppleWebKit/532.3+ (KHTML, like Gecko) Version/4.0.3 Safari/531.9");
         
@@ -53,12 +53,20 @@ public class PageDownloader {
         
         HttpEntity entity = response.getEntity();
     	if (entity != null){
-            return EntityUtils.toString(entity);
+    		return entity;
 		}
     	else{
     		throw new DownloadException();
     	}
 	}
 	
-	//TODO: Add a method to get pdf documents
+	public String getPage(HttpHost targetHost, String content) throws DownloadException, IOException{
+		HttpEntity entity = getContent(targetHost, content);
+		return EntityUtils.toString(entity);
+	}
+	
+	public byte[] getBinaryData(HttpHost targetHost, String content) throws DownloadException, IOException{
+		HttpEntity entity = getContent(targetHost, content);
+		return EntityUtils.toByteArray(entity);
+	}
 }

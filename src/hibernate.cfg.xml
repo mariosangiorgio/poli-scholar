@@ -22,8 +22,9 @@
 	<property name="hibernate.hbm2ddl.auto">create-drop</property>
 	<!-- TODO: Once the database structure is defined remove the drop option -->
 	
-	<mapping class="it.polimi.data.hibernate.entities.Author"/>
+	<mapping class="it.polimi.data.hibernate.entities.Journal"/>
 	<mapping class="it.polimi.data.hibernate.entities.Article"/>
+	<mapping class="it.polimi.data.hibernate.entities.Author"/>
 	
 </session-factory>
 </hibernate-configuration>

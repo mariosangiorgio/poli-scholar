@@ -1,5 +1,9 @@
 package it.polimi.crawler;
 
+import it.polimi.data.hibernate.entities.Article;
+import it.polimi.data.hibernate.entities.Author;
+import it.polimi.data.hibernate.entities.Journal;
+
 import java.util.Collection;
 import java.util.Vector;
 import java.util.regex.Matcher;
@@ -9,7 +13,6 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.http.HttpHost;
 
 public class IEEECrawler extends JournalCrawler {
-	
 	/*
 	 *  Pattern to match the list of the issues in the index of the journal.
 	 *  The capturing group captures the identifier of each issue.
@@ -38,22 +41,30 @@ public class IEEECrawler extends JournalCrawler {
 	private final Pattern titleAndAuthors	= Pattern.compile("<p><span class=\"headNavBlueXLarge2\">\\s*([^<]*)</span></p>\\s*<p>\\s*<span class=\"bodyCopyBlackLargeSpaced\">((?:\\s*<a href=\"[^\"]*\" class=\"bodyCopy\">[^<]*</a>&nbsp;&nbsp;)*)\\s*<br>([^<]*)</span></p>");
 	private final Pattern authorName		= Pattern.compile("\\s*<a href=\"[^\"]*\" class=\"bodyCopy\">\\s*([^<]*)</a>");
 	
-	public IEEECrawler(String proxyHostname, int proxyPort, String username,
+	public IEEECrawler(String journalName, String journalIdentifier, String proxyHostname, int proxyPort, String username,
 			String password) {
-		super(new HttpHost("ieeexplore.ieee.org"), proxyHostname, proxyPort,
-				username, password);
+		super(journalName, journalIdentifier, new HttpHost("ieeexplore.ieee.org"),
+				proxyHostname, proxyPort, username, password);
 	}
 
-	public IEEECrawler(String proxyHostname, int proxyPort) {
-		super(new HttpHost("ieeexplore.ieee.org"), proxyHostname, proxyPort);
+	public IEEECrawler(String journalName, String journalIdentifier, String proxyHostname, int proxyPort) {
+		super(journalName, journalIdentifier, new HttpHost("ieeexplore.ieee.org"), proxyHostname, proxyPort);
 	}
 
-	public IEEECrawler() {
-		super(new HttpHost("ieeexplore.ieee.org"));
+	public IEEECrawler(String journalName, String journalIdentifier) {
+		super(journalName, journalIdentifier, new HttpHost("ieeexplore.ieee.org"));
 	}
 
 	@Override
-	public Collection<String> getYearIssuesList(int journalIdentifier, int year) {
+	public void getYearArticles(int year) {
+		//Looking if the journal already appears in the database and creating it if it doesn't
+		session.beginTransaction();
+		Journal journal = (Journal) session.getNamedQuery("findJournalByName").setParameter("journalName", journalName).uniqueResult();
+		
+		if(journal == null){
+			journal = new Journal(journalName);
+		}
+		
 		Collection<String> issuesPages = new Vector<String>();
 		try {
 			System.out.println("Getting the " + year
@@ -73,7 +84,18 @@ public class IEEECrawler extends JournalCrawler {
 					+ " issues of IEEE Transactions on Software Engineering");
 			e.printStackTrace();
 		}
-		return issuesPages;
+		
+		for(String issuePage : issuesPages){
+			Collection<String> paperAddresses = getPaperOfAnIssue(issuePage);
+			for(String paperAddress:paperAddresses){
+				Article article = getPaperData(paperAddress);
+				article.setYear(year);
+				session.saveOrUpdate(article);
+				journal.addArticle(article);
+			}
+		}
+		session.saveOrUpdate(journal);
+		session.getTransaction().commit();
 	}
 
 	@Override
@@ -97,31 +119,45 @@ public class IEEECrawler extends JournalCrawler {
 	}
 
 	@Override
-	public void testConnection() throws Exception {
-			downloader.getPage(targetHost, "/");
-
-	}
-
-	@Override
-	public void getPaperData(String paperAddress) {
+	public Article getPaperData(String paperAddress) {
+		Article article = new Article();
+		
 		try {
 			String dataPage = downloader.getPage(targetHost, paperAddress);
+			
 			Matcher matcher = titleAndAuthors.matcher(dataPage);
 			while (matcher.find()) {
-				System.out.println(StringEscapeUtils.unescapeHtml(matcher.group(1)));
+				//Title
+				article.setTitle(StringEscapeUtils.unescapeHtml(matcher.group(1)));
+				
+				//Author affiliation
+				String affiliation = StringEscapeUtils.unescapeHtml(matcher.group(3));
+				
+				//Author names
 				Matcher authorMatcher = authorName.matcher(matcher.group(2));
 				while(authorMatcher.find()){
-					System.out.println(StringEscapeUtils.unescapeHtml(authorMatcher.group(1)));
+					String authorName = StringEscapeUtils.unescapeHtml(authorMatcher.group(1));
+					//Getting the author if it is already in the database
+					Author author = (Author) session.getNamedQuery("findAuthorByName").setParameter("authorName", authorName).uniqueResult();
+					if(author == null){
+						author = new Author(authorName,affiliation);
+					}
+					article.addAuthor(author);
 				}
-				System.out.println(StringEscapeUtils.unescapeHtml(matcher.group(3)));
 			}
+			
+			for(Author author:article.getAuthors()){
+				author.addArticle(article);
+				session.saveOrUpdate(author);
+			}
+			
 			Matcher abstractMatcher = articleAbstract.matcher(dataPage);
 			if(abstractMatcher.find()){
-				System.out.println(abstractMatcher.group(1));
+				article.setArticleAbstract(abstractMatcher.group(1));
 			}
 			Matcher fullTextMatcher = fullTextPDF.matcher(dataPage);
 			if(fullTextMatcher.find()){
-				System.out.println(fullTextMatcher.group(1));
+				article.setFullTextPdf(downloader.getBinaryData(targetHost, fullTextMatcher.group(1)));
 			}
 			
 		} catch (Exception e) {
@@ -129,7 +165,12 @@ public class IEEECrawler extends JournalCrawler {
 					+ " paper of IEEE Transactions on Software Engineering");
 			e.printStackTrace();
 		}
-		// TODO Auto-generated method stub
-		
+		return article;
+	}
+	
+	@Override
+	public void testConnection() throws Exception {
+			downloader.getPage(targetHost, "/");
+
 	}
 }

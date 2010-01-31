@@ -7,6 +7,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "AUTHORS")
+@NamedQuery(name = "findAuthorByName", query = "from Author author where author.name = :authorName")
 public class Author {
 	@Id @GeneratedValue
 	@Column(name = "AuthorId")
