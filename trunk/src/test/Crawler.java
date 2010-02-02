@@ -9,7 +9,7 @@ import java.net.URISyntaxException;
 
 import org.apache.http.client.ClientProtocolException;
 
-public class Main {
+public class Crawler {
 	
 	public static void main(String[] args) throws ClientProtocolException, IOException, DownloadException, URISyntaxException {
 		String proxyHostname= "proxy.polimi.it";
