@@ -9,6 +9,7 @@ import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "ARTICLES")
+@NamedQuery(name = "getArticlesByYear", query = "from Article article where article.year = :articleYear")
 public class Article {
 	@Id
 	@GeneratedValue
