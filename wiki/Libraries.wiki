@@ -1,7 +1,7 @@
 #summary This page has the references to all the libraries required to build the tool
 #labels Phase-Deploy
 = HTTP Client =
-The HTTP Client uses the Apache [http://hc.apache.org/httpclient-3.x/ HttpClient] library. Be sure to download the version with all the dependencies.
+The HTTP Client uses the Apache [http://hc.apache.org/httpclient-3.x/ HttpClient] library. Be sure to download the version with all the dependencies. It is also used the [http://commons.apache.org/downloads/download_lang.cgi Apache Commons] library to decode HTML encoded special characters.
 
 = Database interaction =
 The database interaction requires the [https://www.hibernate.org/30.html Hibernate Core] [http://www.slf4j.org/download.html slf4j Simple] and the [http://dev.mysql.com/downloads/connector/j/ MySQL Connector] libraries.
