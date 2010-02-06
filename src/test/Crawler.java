@@ -1,7 +1,10 @@
 package test;
 
+import gnu.getopt.Getopt;
+import gnu.getopt.LongOpt;
 import it.polimi.crawler.IEEECrawler;
 import it.polimi.crawler.JournalCrawler;
+import it.polimi.data.hibernate.HibernateUtil;
 import it.polimi.webClient.DownloadException;
 
 import java.io.IOException;
@@ -14,18 +17,80 @@ public class Crawler {
 	public static void main(String[] args) throws ClientProtocolException, IOException, DownloadException, URISyntaxException {
 		String proxyHostname= "proxy.polimi.it";
 		int	   proxyPort	= 8080;
+		String proxyUsername = null, proxyPassword = null;
+		String journalName = null, journalIdentifier = null;
+		int	from = -1, to = -1;
+		StringBuffer buffer = new StringBuffer();
+		boolean cleanup = false;
+		
+		LongOpt longOptions[] = new LongOpt[8];
+		longOptions[0] = new LongOpt("journalName", LongOpt.REQUIRED_ARGUMENT, buffer, 'n');
+		longOptions[1] = new LongOpt("journalIdentifier", LongOpt.REQUIRED_ARGUMENT, buffer, 'i');
+		
+		longOptions[2] = new LongOpt("username", LongOpt.REQUIRED_ARGUMENT, buffer, 'u');
+		longOptions[3] = new LongOpt("password", LongOpt.REQUIRED_ARGUMENT, buffer, 'p');
+		
+		longOptions[4] = new LongOpt("from", LongOpt.REQUIRED_ARGUMENT, buffer, 'f');
+		longOptions[5] = new LongOpt("to", LongOpt.REQUIRED_ARGUMENT, buffer, 't');
+		
+		longOptions[6] = new LongOpt("cleanup", LongOpt.NO_ARGUMENT, null, 'c');
+		longOptions[7] = new LongOpt("help", LongOpt.NO_ARGUMENT, null, 'h');
+		
+		Getopt options = new Getopt("Crawler", args, "", longOptions);
+		while(options.getopt() != -1){
+			int option = options.getLongind();
+			switch (option) {
+			case 0:
+				journalName = options.getOptarg();
+				break;
+			case 1:
+				journalIdentifier = options.getOptarg();
+				break;
+			case 2:
+				proxyUsername = options.getOptarg();
+				break;
+			case 3:
+				proxyPassword = options.getOptarg();
+				break;
+			case 4:
+				from = Integer.parseInt(options.getOptarg());
+				break;
+			case 5:
+				to = Integer.parseInt(options.getOptarg());
+				break;
+			case 6:
+				cleanup = true;
+				break;
+			case 7:
+				printUsage();
+			default:
+				break;
+			}
+		}
+		
+		if(cleanup){
+			try {
+				HibernateUtil.resetDatabase();
+			} catch (Exception e) {
+				e.printStackTrace();
+				return;
+			}
+		}
+		
+		if(journalIdentifier == null || journalName == null){
+			System.out.println("Missing journal name or identifier");
+			printUsage();
+		}
 		
 		JournalCrawler ieeeCrawler;
 		
-		if(args.length == 2){
-			String username		= args[0];
-			String password		= args[1];
+		if(proxyUsername != null && proxyPassword != null){
 			System.out.println("Using the provided username and password for the proxy");
-			ieeeCrawler = new IEEECrawler("TSE", "32", proxyHostname, proxyPort, username, password);
+			ieeeCrawler = new IEEECrawler(journalName, journalIdentifier, proxyHostname, proxyPort, proxyUsername, proxyPassword);
 		}
 		else{
 			System.out.println("No proxy login information provided");
-			ieeeCrawler = new IEEECrawler("TSE", "32", proxyHostname, proxyPort);
+			ieeeCrawler = new IEEECrawler(journalName, journalIdentifier, proxyHostname, proxyPort);
 		}
 		
 		try {
@@ -37,17 +102,14 @@ public class Crawler {
 			return;
 		}
 		
-		ieeeCrawler.getYearArticles(2010);
-		
-		//ieeeCrawler.getPaperData("http://ieeexplore.ieee.org/xpls/abs_all.jsp?isnumber=5401361&arnumber=5196681&count=11&index=3");
-		
-		/*
-		for(String issue:ieeeCrawler.getYearIssuesList(32,2009)){
-			for(String paper:ieeeCrawler.getPaperOfAnIssue(issue)){
-				System.out.println(paper);
-			}
+		for(int year=from; year<= to; year++){
+			ieeeCrawler.getYearArticles(year);	
 		}
-		*/
+	}
+
+	private static void printUsage() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

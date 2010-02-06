@@ -2,15 +2,21 @@ package it.polimi.data.hibernate;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AnnotationConfiguration;
+import org.hibernate.cfg.Environment;
 
 public class HibernateUtil {
 
-    private static final SessionFactory sessionFactory = buildSessionFactory();
+    private static SessionFactory sessionFactory = null;
+    private static boolean resetDatabase = false;
 
-    private static SessionFactory buildSessionFactory() {
+    private static void buildSessionFactory() {
         try {
             // Create the SessionFactory from hibernate.cfg.xml
-        	return new AnnotationConfiguration().configure().buildSessionFactory();
+        	AnnotationConfiguration configuration = new AnnotationConfiguration().configure();
+			if(resetDatabase){
+        		configuration.setProperty(Environment.HBM2DDL_AUTO, "create");
+        	}
+        	sessionFactory =  configuration.buildSessionFactory();
         }
         catch (Throwable ex) {
             // Make sure you log the exception, as it might be swallowed
@@ -20,7 +26,17 @@ public class HibernateUtil {
     }
 
     public static SessionFactory getSessionFactory() {
+    	if(sessionFactory == null){
+    		buildSessionFactory();
+    	}
         return sessionFactory;
+    }
+    
+    public static void resetDatabase() throws Exception{
+    	if(sessionFactory != null){
+    		throw new Exception("A session factory has already been created");
+    	}
+    	resetDatabase = true;
     }
 
 }
