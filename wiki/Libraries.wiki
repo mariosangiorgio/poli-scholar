@@ -8,3 +8,6 @@ Stemming is performed using the [http://snowball.tartarus.org/download.php Snowb
 
 = Database interaction =
 The database interaction requires the [https://www.hibernate.org/30.html Hibernate Core] [http://www.slf4j.org/download.html slf4j Simple] and the [http://dev.mysql.com/downloads/connector/j/ MySQL Connector] libraries.
+
+== User Interaction ==
+The [http://www.urbanophile.com/~arenn/hacking/download.html#getopt GetOpt] library is used to process command line parameters
