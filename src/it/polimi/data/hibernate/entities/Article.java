@@ -9,18 +9,20 @@ import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "ARTICLES")
-@NamedQuery(name = "getArticlesByYear", query = "from Article article where article.year = :articleYear")
+@NamedQueries( {
+		@NamedQuery(name = "getArticlesByYear", query = "from Article article where article.year = :articleYear"),
+		@NamedQuery(name = "findArticleByTitle", query = "from Article article where article.title = :title") })
 public class Article {
 	@Id
 	@GeneratedValue
 	@Column(name = "ArticleId")
 	private long identifier;
-	
+
 	private String title;
-	
+
 	@Type(type = "text")
 	private String articleAbstract;
-	
+
 	private int year;
 
 	@Lob

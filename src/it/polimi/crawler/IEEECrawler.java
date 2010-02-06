@@ -120,29 +120,37 @@ public class IEEECrawler extends JournalCrawler {
 
 	@Override
 	public Article getPaperData(String paperAddress) {
-		Article article = new Article();
+		Article article = null;
 		
 		try {
 			String dataPage = downloader.getPage(targetHost, paperAddress);
 			
 			Matcher matcher = titleAndAuthors.matcher(dataPage);
-			while (matcher.find()) {
-				//Title
-				article.setTitle(StringEscapeUtils.unescapeHtml(matcher.group(1)));
+			if (matcher.find()) {
+				String title = StringEscapeUtils.unescapeHtml(matcher.group(1));
 				
-				//Author affiliation
-				String affiliation = StringEscapeUtils.unescapeHtml(matcher.group(3));
+				article = (Article) session.getNamedQuery("findArticleByTitle").setParameter("title", journalName).uniqueResult();
 				
-				//Author names
-				Matcher authorMatcher = authorName.matcher(matcher.group(2));
-				while(authorMatcher.find()){
-					String authorName = StringEscapeUtils.unescapeHtml(authorMatcher.group(1));
-					//Getting the author if it is already in the database
-					Author author = (Author) session.getNamedQuery("findAuthorByName").setParameter("authorName", authorName).uniqueResult();
-					if(author == null){
-						author = new Author(authorName,affiliation);
+				if(article == null){
+					article = new Article();
+					
+					//Title
+					article.setTitle(title);
+					
+					//Author affiliation
+					String affiliation = StringEscapeUtils.unescapeHtml(matcher.group(3));
+					
+					//Author names
+					Matcher authorMatcher = authorName.matcher(matcher.group(2));
+					while(authorMatcher.find()){
+						String authorName = StringEscapeUtils.unescapeHtml(authorMatcher.group(1));
+						//Getting the author if it is already in the database
+						Author author = (Author) session.getNamedQuery("findAuthorByName").setParameter("authorName", authorName).uniqueResult();
+						if(author == null){
+							author = new Author(authorName,affiliation);
+						}
+						article.addAuthor(author);
 					}
-					article.addAuthor(author);
 				}
 			}
 			

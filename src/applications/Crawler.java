@@ -108,8 +108,11 @@ public class Crawler {
 	}
 
 	private static void printUsage() {
-		// TODO Auto-generated method stub
-		
+		System.out.println("--journalName NAME and --journalIdentifier ID to set what journal you want to crawl");
+		System.out.println("--username NAME and --password PASSWORD to set your proxy authentication");
+		System.out.println("--from YEAR and --to YEAR to set what numbers you are intersted in");
+		System.out.println("--cleanup to cleanup the database before starting the data import");
+		System.out.println("--help to see this reference");
 	}
 
 }
