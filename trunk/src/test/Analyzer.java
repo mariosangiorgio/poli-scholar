@@ -1,24 +1,18 @@
 package test;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.Vector;
-import java.util.Map.Entry;
-
 import it.polimi.analyzer.WordFrequencyAnalyzer;
 import it.polimi.data.hibernate.HibernateUtil;
 import it.polimi.data.hibernate.entities.Article;
 
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.Map.Entry;
+
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.tartarus.snowball.ext.porterStemmer;
 
 public class Analyzer {
 

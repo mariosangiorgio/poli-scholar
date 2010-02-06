@@ -25,8 +25,14 @@ public class WordFrequencyAnalyzer {
 		cleanedText = matcher.replaceAll(" ");
 		cleanedText = cleanedText.toLowerCase();
 		String[] words = cleanedText.split("\\s+");
+		
+		//Setting up the stoplist
+		StopList stoplist = StopList.getStoplist();
 
 		for (String currentWord : words) {
+			if(stoplist.contains(currentWord)){
+				continue;
+			}
 
 			stemmer.setCurrent(currentWord);
 			stemmer.stem();
