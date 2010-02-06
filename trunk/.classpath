@@ -23,5 +23,6 @@
 	<classpathentry kind="lib" path="/Users/mariosangiorgio/Documents/Projects/Eclipse workspace/lib/commons-lang-2.4/commons-lang-2.4.jar"/>
 	<classpathentry kind="lib" path="/Users/mariosangiorgio/Documents/Projects/Eclipse workspace/lib/pdfbox-0.8.0-incubating.jar.zip"/>
 	<classpathentry kind="lib" path="/Users/mariosangiorgio/Documents/Projects/Eclipse workspace/lib/libstemmer_java"/>
+	<classpathentry kind="lib" path="/Users/mariosangiorgio/Documents/Projects/Eclipse workspace/lib/java-getopt-1.0.13.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
