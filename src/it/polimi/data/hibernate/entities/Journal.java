@@ -26,6 +26,9 @@ public class Journal {
 	
 	@OneToMany
 	private Collection<Article> articles = new Vector<Article>();
+	
+	public Journal() {
+	}
 
 	public Journal(String journalName) {
 		this.name = journalName;

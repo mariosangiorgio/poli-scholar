@@ -3,7 +3,9 @@ package it.polimi.crawler;
 import it.polimi.data.hibernate.HibernateUtil;
 import it.polimi.data.hibernate.entities.Article;
 import it.polimi.webClient.ContentDownloader;
+
 import java.util.Collection;
+
 import org.apache.http.HttpHost;
 import org.hibernate.Session;
 
@@ -59,5 +61,5 @@ public abstract class JournalCrawler {
 	
 	public abstract Collection<String> getPaperOfAnIssue(String issueAddress);
 	
-	public abstract Article getPaperData(String paperAddress);
+	public abstract Article getPaperData(String paperAddress) throws Exception;
 }
