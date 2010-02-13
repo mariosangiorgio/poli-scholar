@@ -5,7 +5,7 @@ import it.polimi.data.hibernate.HibernateUtil;
 import it.polimi.data.hibernate.entities.Article;
 
 import java.util.Comparator;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -28,16 +28,20 @@ public class Analyzer {
 
 		Query query = session.getNamedQuery("getArticlesByYear");
 		query.setParameter("articleYear", 2010);
+		
+		Iterator result = query.iterate(); //Used this rather than query.list() to save memory
 
-		List result = query.list();
-
-		for (Object o : result) {
-			Article article = (Article) o;
+		while(result.hasNext()){
+			Article article = (Article) result.next();
+			
+			String text;
+			//text = article.getArticleAbstract();
+			text = article.getFullText();
 
 			System.out.println("Frequency count for: "+article.getTitle());
-			System.out.println("Abstract: "+article.getArticleAbstract());
-			Map<String, Integer> frequencyCount = analyzer
-					.getFrequencyCount(article.getArticleAbstract());
+			System.out.println("Length: "+text.length());
+			//System.out.println("Text: "+text);
+			Map<String, Integer> frequencyCount = analyzer.getFrequencyCount(text);
 			
 			// Sorting the result
 			Set<Entry<String,Integer>> values = frequencyCount.entrySet();
@@ -64,7 +68,13 @@ public class Analyzer {
 				System.out.println(entry.getKey() + "\t\t" + entry.getValue());
 			}
 			System.out.println("");
+			
+			//Clearing session to avoid memory leakages
+			session.evict(article);
+			session.clear();
 		}
+		session.close();
+		System.out.println("Done");
 	}
 
 }

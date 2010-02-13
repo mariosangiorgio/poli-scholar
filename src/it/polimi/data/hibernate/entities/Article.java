@@ -1,10 +1,18 @@
 package it.polimi.data.hibernate.entities;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.nio.channels.WritableByteChannel;
 import java.util.List;
 import java.util.Vector;
 
+import javassist.bytecode.ByteArray;
+
 import javax.persistence.*;
 
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.util.PDFTextStripper;
 import org.hibernate.annotations.Type;
 
 @Entity
@@ -83,6 +91,23 @@ public class Article {
 
 	public int getYear() {
 		return year;
+	}
+
+	public String getFullText() {
+		StringWriter writer = new StringWriter();
+		try {
+			ByteArrayInputStream stream = new ByteArrayInputStream(fullTextPdf);
+			PDDocument document = PDDocument.load(stream);
+			PDFTextStripper stripper = new PDFTextStripper();
+			stripper.writeText(document, writer);
+			document.close();
+			stream.close();
+			writer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return writer.toString();
 	}
 
 }
