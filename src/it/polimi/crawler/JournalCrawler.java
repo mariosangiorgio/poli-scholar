@@ -1,13 +1,11 @@
 package it.polimi.crawler;
 
-import it.polimi.data.hibernate.HibernateUtil;
 import it.polimi.data.hibernate.entities.Article;
 import it.polimi.webClient.ContentDownloader;
 
 import java.util.Collection;
 
 import org.apache.http.HttpHost;
-import org.hibernate.Session;
 
 /**
  * Generic class for a Journal Crawler.
@@ -22,14 +20,12 @@ public abstract class JournalCrawler {
 	
 	protected ContentDownloader downloader;
 	protected HttpHost			targetHost;
-	protected Session			session;
 	
 	protected JournalCrawler(String journalName, String journalIdentifier, HttpHost targetHost){
 		this.journalIdentifier = journalIdentifier;
 		this.journalName	   = journalName;
 		downloader = new ContentDownloader();
 		this.targetHost = targetHost;
-		session = HibernateUtil.getSessionFactory().getCurrentSession();
 	}
 	
 	protected JournalCrawler(String journalName, String journalIdentifier, HttpHost targetHost,
@@ -59,7 +55,7 @@ public abstract class JournalCrawler {
 	 */
 	public abstract void getYearArticles(int year);
 	
-	public abstract Collection<String> getPaperOfAnIssue(String issueAddress);
+	public abstract Collection<String> getPapersOfAnIssue(String issueAddress);
 	
 	public abstract Article getPaperData(String paperAddress) throws Exception;
 }

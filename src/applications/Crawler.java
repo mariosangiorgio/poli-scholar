@@ -4,7 +4,7 @@ import gnu.getopt.Getopt;
 import gnu.getopt.LongOpt;
 import it.polimi.crawler.IEEECrawler;
 import it.polimi.crawler.JournalCrawler;
-import it.polimi.data.hibernate.HibernateUtil;
+import it.polimi.data.hibernate.HibernateSessionManager;
 import it.polimi.webClient.DownloadException;
 
 import java.io.IOException;
@@ -70,7 +70,7 @@ public class Crawler {
 		
 		if(cleanup){
 			try {
-				HibernateUtil.resetDatabase();
+				HibernateSessionManager.resetDatabase();
 			} catch (Exception e) {
 				e.printStackTrace();
 				return;
@@ -105,6 +105,7 @@ public class Crawler {
 		for(int year=from; year<= to; year++){
 			ieeeCrawler.getYearArticles(year);	
 		}
+		System.out.println("Done");
 	}
 
 	private static void printUsage() {

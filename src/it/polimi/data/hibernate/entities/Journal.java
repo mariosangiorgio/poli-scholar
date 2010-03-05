@@ -1,14 +1,10 @@
 package it.polimi.data.hibernate.entities;
 
-import java.util.Collection;
-import java.util.Vector;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -23,9 +19,6 @@ public class Journal {
 	private long identifier;
 
 	private String name;
-	
-	@OneToMany
-	private Collection<Article> articles = new Vector<Article>();
 	
 	public Journal() {
 	}
@@ -49,9 +42,5 @@ public class Journal {
 
 	public String getName() {
 		return name;
-	}
-	
-	public void addArticle(Article article){
-		articles.add(article);
 	}
 }

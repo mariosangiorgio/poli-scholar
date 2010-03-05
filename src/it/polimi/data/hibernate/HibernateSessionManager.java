@@ -1,14 +1,14 @@
 package it.polimi.data.hibernate;
 
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AnnotationConfiguration;
 import org.hibernate.cfg.Environment;
 
-public class HibernateUtil {
-
+public class HibernateSessionManager {
     private static SessionFactory sessionFactory = null;
     private static boolean resetDatabase = false;
-
+	
     private static void buildSessionFactory() {
         try {
             // Create the SessionFactory from hibernate.cfg.xml
@@ -24,13 +24,6 @@ public class HibernateUtil {
             throw new ExceptionInInitializerError(ex);
         }
     }
-
-    public static SessionFactory getSessionFactory() {
-    	if(sessionFactory == null){
-    		buildSessionFactory();
-    	}
-        return sessionFactory;
-    }
     
     public static void resetDatabase() throws Exception{
     	if(sessionFactory != null){
@@ -38,5 +31,12 @@ public class HibernateUtil {
     	}
     	resetDatabase = true;
     }
+    
+	public static Session getNewSession(){
+		if(sessionFactory == null){
+			buildSessionFactory();
+		}
+		return sessionFactory.openSession();
+	}
 
 }

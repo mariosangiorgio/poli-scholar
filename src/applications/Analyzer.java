@@ -1,7 +1,7 @@
 package applications;
 
 import it.polimi.analyzer.WordFrequencyAnalyzer;
-import it.polimi.data.hibernate.HibernateUtil;
+import it.polimi.data.hibernate.HibernateSessionManager;
 import it.polimi.data.hibernate.entities.Article;
 
 import java.util.Comparator;
@@ -23,13 +23,13 @@ public class Analyzer {
 	public static void main(String[] args) {
 		WordFrequencyAnalyzer analyzer = new WordFrequencyAnalyzer();
 
-		Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+		Session session = HibernateSessionManager.getNewSession();
 		session.beginTransaction();
 
 		Query query = session.getNamedQuery("getArticlesByYear");
 		query.setParameter("articleYear", 2010);
 		
-		Iterator result = query.iterate(); //Used this rather than query.list() to save memory
+		Iterator result = query.iterate(); // I used this rather than query.list() to save memory
 
 		while(result.hasNext()){
 			Article article = (Article) result.next();
