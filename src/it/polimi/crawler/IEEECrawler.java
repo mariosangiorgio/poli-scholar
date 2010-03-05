@@ -171,6 +171,9 @@ public class IEEECrawler extends JournalCrawler {
 	public void getYearArticles(int year) {
 		// Looking if the journal already appears in the database and creating
 		// it if it doesn't
+		if(session==null || !session.isOpen()){
+			session = HibernateSessionManager.getNewSession();
+		}
 		session.beginTransaction();
 		
 		Journal journal = (Journal) session.getNamedQuery(
