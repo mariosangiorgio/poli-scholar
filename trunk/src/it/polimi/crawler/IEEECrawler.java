@@ -1,5 +1,6 @@
 package it.polimi.crawler;
 
+import it.polimi.data.hibernate.HibernateSessionManager;
 import it.polimi.data.hibernate.entities.Article;
 import it.polimi.data.hibernate.entities.Author;
 import it.polimi.data.hibernate.entities.Journal;
@@ -11,52 +12,39 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.http.HttpHost;
+import org.hibernate.Query;
+import org.hibernate.Session;
 
 public class IEEECrawler extends JournalCrawler {
-	/*
-	 * Pattern to match the list of the issues in the index of the journal. The
-	 * capturing group captures the identifier of each issue.
-	 */
-	private final Pattern issuesListPattern = Pattern
-			.compile("<option value=\"(\\d*)\"(?: selected)?>\\s*Volume [\\s\\w-,]*</option>");
-
-	/*
-	 * Pattern to match the list of the articles in a issue of the journal. The
-	 * first capturing group captures the relative address of each article. The
-	 * second capturing grup just captures the identifier of each article rather
-	 * than the whole address.
-	 */
+	private final Pattern issueIdentifierPattern = Pattern
+			.compile("\\[\"[^\"]*\",\"(\\d*)\"\\]");
 	private final Pattern articleListPattern = Pattern
-			.compile("<a href=\"(/xpls/abs_all.jsp\\?isnumber=\\d*&arnumber=(\\d*)&count=\\d*&index=\\d*)\" class=\"bodyCopySpaced\">AbstractPlus</a>");
-	private final Pattern articleAbstract = Pattern
-			.compile("Abstract</span><br>\\s*([^<]*)");
-	private final Pattern articleIdentifier = Pattern.compile("/xpls/abs_all.jsp\\?isnumber=(\\d*)&arnumber=(\\d*)&count=\\d*&index=\\d*");
+			.compile("<a href=\"/xpls/abs_all\\.jsp\\?arnumber=(\\d*)\">AbstractPlus</a>");
 
-	// Patterns to extract data.
-
-	/*
-	 * This patterns gets the title and the author of and article. The first
-	 * capturing group captures the title. The second capturing group captures
-	 * the names of the authors. The third capturing group captures the
-	 * affiliation of the authors.
-	 */
-	private final Pattern titleAndAuthors = Pattern
-			.compile("<p><span class=\"headNavBlueXLarge2\">\\s*([^<]*)</span></p>\\s*<p>\\s*<span class=\"bodyCopyBlackLargeSpaced\">((?:\\s*<a href=\"[^\"]*\" class=\"bodyCopy\">[^<]*</a>&nbsp;&nbsp;)*)\\s*<br>([^<]*)</span></p>");
-	private final Pattern authorName = Pattern
-			.compile("\\s*<a href=\"[^\"]*\" class=\"bodyCopy\">\\s*([^<]*)</a>");
-
-	public IEEECrawler(String journalName, String journalIdentifier,
-			String proxyHostname, int proxyPort, String username,
-			String password) {
-		super(journalName, journalIdentifier, new HttpHost(
-				"ieeexplore.ieee.org"), proxyHostname, proxyPort, username,
-				password);
-	}
+	private final Pattern titlePattern = Pattern
+			.compile("var artTitle='([^']*)';");
+	private final Pattern authorsPattern = Pattern
+			.compile("var author='([^']*)';");
+	private final Pattern authorInfo = Pattern.compile("\\+([^,]*), ([^\\+]*)");
+	private final Pattern abstractPattern = Pattern
+			.compile("<a name=\"Abstract\"><h2>Abstract</h2></a>\\s*<p>([^<]*)</p>");
+	private final Pattern articleIdentifierPattenr = Pattern
+			.compile("var arNumber='(\\d*)';");
+	
+	private Session session = HibernateSessionManager.getNewSession();
 
 	public IEEECrawler(String journalName, String journalIdentifier,
 			String proxyHostname, int proxyPort) {
 		super(journalName, journalIdentifier, new HttpHost(
 				"ieeexplore.ieee.org"), proxyHostname, proxyPort);
+	}
+
+	public IEEECrawler(String journalName, String journalIdentifier,
+			String proxyHostname, int proxyPort, String proxyUsername,
+			String proxyPassword) {
+		super(journalName, journalIdentifier, new HttpHost(
+				"ieeexplore.ieee.org"), proxyHostname, proxyPort,
+				proxyUsername, proxyPassword);
 	}
 
 	public IEEECrawler(String journalName, String journalIdentifier) {
@@ -65,94 +53,33 @@ public class IEEECrawler extends JournalCrawler {
 	}
 
 	@Override
-	public void getYearArticles(int year) {
-		// Looking if the journal already appears in the database and creating
-		// it if it doesn't
-		session.beginTransaction();
-		Journal journal = (Journal) session.getNamedQuery("findJournalByName")
-				.setParameter("journalName", journalName).uniqueResult();
-
-		if (journal == null) {
-			journal = new Journal(journalName);
-		}
-
-		Collection<String> issuesPages = new Vector<String>();
-		try {
-			System.out.println("Getting the " + year
-					+ " issues of IEEE Transactions on Software Engineering");
-
-			String yearIssues = downloader.getPage(targetHost,
-					"/xpl/RecentIssue.jsp?punumber=" + journalIdentifier
-							+ "&year=" + year);
-
-			Matcher matcher = issuesListPattern.matcher(yearIssues);
-			while (matcher.find()) {
-				String issueNumber = matcher.group(1);
-				issuesPages.add("/xpl/tocresult.jsp?isnumber=" + issueNumber
-						+ "&isYear=" + year);
-			}
-		} catch (Exception e) {
-			System.err.println("Something went wrong getting the " + year
-					+ " issues of IEEE Transactions on Software Engineering");
-			e.printStackTrace();
-		}
-
-		for (String issuePage : issuesPages) {
-			Collection<String> paperAddresses = getPaperOfAnIssue(issuePage);
-			for (String paperAddress : paperAddresses) {
-				Article article;
-				try {
-					article = getPaperData(paperAddress);
-					article.setYear(year);
-					session.saveOrUpdate(article);
-					journal.addArticle(article);
-				} catch (Exception e) {
-					System.err.println("Something went wrong downloading "
-							+ paperAddress + " from the IEEE library");
-					e.printStackTrace();
-				}
-			}
-		}
-		session.saveOrUpdate(journal);
-		session.getTransaction().commit();
-	}
-
-	@Override
-	public Collection<String> getPaperOfAnIssue(String issueAddress) {
-		Collection<String> papersPages = new Vector<String>();
-		try {
-			System.out.println("Getting the papers of the " + issueAddress
-					+ " issue of IEEE Transactions on Software Engineering");
-
-			String issueIndex = downloader.getPage(targetHost, issueAddress);
-
-			Matcher matcher = articleListPattern.matcher(issueIndex);
-			while (matcher.find()) {
-				String paperURL = matcher.group(1);
-				papersPages.add(paperURL);
-			}
-		} catch (Exception e) {
-			System.err.println("Something went wrong getting the "
-					+ issueAddress
-					+ " issue of IEEE Transactions on Software Engineering");
-			e.printStackTrace();
-		}
-		return papersPages;
-	}
-
-	@Override
 	public Article getPaperData(String paperAddress) throws Exception {
 		Article article = null;
-
+		
+		System.out.println("Downloading the "+paperAddress+" paper information");
+		
 		String dataPage = downloader.getPage(targetHost, paperAddress);
 
-		Matcher matcher = titleAndAuthors.matcher(dataPage);
-		if (matcher.find()) {
-			String title = StringEscapeUtils.unescapeHtml(matcher.group(1));
-			// TODO: skip Editorals
+		Matcher titleMatcher = titlePattern.matcher(dataPage);
+		Matcher authorsMatcher = authorsPattern.matcher(dataPage);
+		if (titleMatcher.find()) {
+			String title = StringEscapeUtils
+					.unescapeHtml(titleMatcher.group(1));
+			authorsMatcher.find();
+			String authors = StringEscapeUtils.unescapeHtml(authorsMatcher
+					.group(1));
+
+			String lowercaseTitle = title.toLowerCase();
+			if (lowercaseTitle.toLowerCase().startsWith("editorial:")
+					|| lowercaseTitle.contains("guest editor")
+					|| lowercaseTitle.contains("ieee computer society")
+					|| lowercaseTitle.contains("reviewers list")) {
+				throw new Exception(
+						"This paper is an editorial, a reviewer list or an index");
+			}
 
 			article = (Article) session.getNamedQuery("findArticleByTitle")
-					.setParameter("title", journalName).uniqueResult();
+					.setParameter("title", title).uniqueResult();
 
 			if (article == null) {
 				article = new Article();
@@ -160,50 +87,154 @@ public class IEEECrawler extends JournalCrawler {
 				// Title
 				article.setTitle(title);
 
-				// Author affiliation
-				String affiliation = StringEscapeUtils.unescapeHtml(matcher
-						.group(3));
-
 				// Author names
-				Matcher authorMatcher = authorName.matcher(matcher.group(2));
+				Matcher authorMatcher = authorInfo.matcher(authors);
 				while (authorMatcher.find()) {
 					String authorName = StringEscapeUtils
+							.unescapeHtml(authorMatcher.group(2));
+					String authorSurname = StringEscapeUtils
 							.unescapeHtml(authorMatcher.group(1));
 					// Getting the author if it is already in the database
-					Author author = (Author) session.getNamedQuery(
-							"findAuthorByName").setParameter("authorName",
-							authorName).uniqueResult();
+					Query query = session.getNamedQuery("findAuthorByName");
+					query.setParameter("authorName", authorName);
+					query.setParameter("authorSurname", authorSurname);
+
+					Author author = (Author) query.uniqueResult();
 					if (author == null) {
-						author = new Author(authorName, affiliation);
+						author = new Author(authorName, authorSurname);
 					}
 					article.addAuthor(author);
 				}
-				for (Author author : article.getAuthors()) {
-					author.addArticle(article);
-					session.saveOrUpdate(author);
-				}
 
-				Matcher abstractMatcher = articleAbstract.matcher(dataPage);
-				if (abstractMatcher.find()) {
-					article.setArticleAbstract(abstractMatcher.group(1));
-				}
-
-				Matcher identifierMatcher = articleIdentifier.matcher(paperAddress);
-				if(identifierMatcher.find()){
-					String articleNumber = identifierMatcher.group(2), issueNumber=identifierMatcher.group(1);
-					article.setFullTextPdf(downloader.getBinaryData(targetHost,"/stampPDF/getPDF.jsp?tp=&arnumber="+articleNumber+"&isnumber="+issueNumber));
-				}
 			}
-		} else {
-			throw new Exception(
-					"This paper is an editorial, a reviewer list or an index");
+			for (Author author : article.getAuthors()) {
+				author.addArticle(article);
+				session.saveOrUpdate(author);
+				session.evict(author);
+			}
+
+			Matcher abstractMatcher = abstractPattern.matcher(dataPage);
+			if (abstractMatcher.find()) {
+				article.setArticleAbstract(abstractMatcher.group(1));
+			}
+			else{
+				throw new Exception("The paper doesn't have and abstract and has been skipped");
+			}
+
+			Matcher identifierMatcher = articleIdentifierPattenr
+					.matcher(dataPage);
+			if (identifierMatcher.find()) {
+				String articleNumber = identifierMatcher.group(1), issueNumber = identifierMatcher
+						.group(1);
+				article.setFullTextPdf(downloader.getBinaryData(targetHost,
+						"/stampPDF/getPDF.jsp?tp=&arnumber=" + articleNumber
+								+ "&isnumber=" + issueNumber));
+			}
 		}
 		return article;
 	}
 
 	@Override
+	public Collection<String> getPapersOfAnIssue(String issueIdentifier) {
+		Collection<String> papersPages = new Vector<String>();
+		try {
+			System.out.println("Getting the papers of the " + issueIdentifier
+					+ " issue of IEEE Transactions on Software Engineering");
+
+			// This cycle is to crawl also the sub-pages
+			int currentPage = 1;
+			int fetchedAddresses = -1;
+			while (fetchedAddresses != 0) {
+				fetchedAddresses = 0;
+				String issuePage = "/xpl/tocresult.jsp?asf_iid="
+						+ issueIdentifier + "&asf_pn=" + currentPage;
+				String issueIndex = downloader.getPage(targetHost, issuePage);
+
+				Matcher matcher = articleListPattern.matcher(issueIndex);
+				while (matcher.find()) {
+					String paperIdentifier = matcher.group(1);
+					papersPages.add("/xpls/abs_all.jsp?arnumber="
+							+ paperIdentifier);
+					fetchedAddresses++;
+				}
+				currentPage++;
+			}
+		} catch (Exception e) {
+			System.err.println("Something went wrong getting the "
+					+ issueIdentifier
+					+ " issue of IEEE Transactions on Software Engineering: "+e);
+		}
+		return papersPages;
+	}
+
+	@Override
+	public void getYearArticles(int year) {
+		// Looking if the journal already appears in the database and creating
+		// it if it doesn't
+		session.beginTransaction();
+		
+		Journal journal = (Journal) session.getNamedQuery(
+				"findJournalByName").setParameter("journalName",
+				journalName).uniqueResult();
+
+		if (journal == null) {
+			journal = new Journal(journalName);
+			session.saveOrUpdate(journal);
+		}
+
+		Collection<String> issuesIdentifiers = new Vector<String>();
+		try {
+			Pattern issues = Pattern
+					.compile("\""
+							+ year
+							+ "\" : \\[(\\[\"[^\"]*\",\"\\d*\"\\](?:,\\[\"[^\"]*\",\"\\d*\"\\])*)\\s*]");
+			System.out.println("Getting the " + year
+					+ " issues of IEEE Transactions on Software Engineering");
+
+			String yearIssues = downloader.getPage(targetHost,
+					"/xpl/RecentIssue.jsp?punumber=" + journalIdentifier
+							+ "&year=" + year);
+
+			Matcher matcher = issues.matcher(yearIssues);
+			while (matcher.find()) {
+				Matcher issueIdentifierMatcher = issueIdentifierPattern
+						.matcher(matcher.group(1));
+				while (issueIdentifierMatcher.find()) {
+					issuesIdentifiers.add(issueIdentifierMatcher.group(1));
+				}
+			}
+		} catch (Exception e) {
+			System.err.println("Something went wrong getting the " + year
+					+ " issues of IEEE Transactions on Software Engineering: "+e);
+		}
+
+		for (String issueIdentifier : issuesIdentifiers) {
+			Collection<String> paperAddresses = getPapersOfAnIssue(issueIdentifier);
+			for (String paperAddress : paperAddresses) {
+				Article article;
+				try {
+					article = getPaperData(paperAddress);
+					article.setYear(year);
+					article.setJournal(journal);
+
+					session.saveOrUpdate(article);
+					session.evict(article);
+					session.flush();
+					session.clear();
+
+				} catch (Exception e) {
+					System.err.println("Something went wrong downloading "
+							+ paperAddress + " from the IEEE library: "+e);
+				}
+			}
+		}
+		session.getTransaction().commit();
+		session.close();
+	}
+
+	@Override
 	public void testConnection() throws Exception {
 		downloader.getPage(targetHost, "/");
-
 	}
+
 }

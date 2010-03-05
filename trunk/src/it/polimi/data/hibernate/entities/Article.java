@@ -3,13 +3,21 @@ package it.polimi.data.hibernate.entities;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.nio.channels.WritableByteChannel;
 import java.util.List;
 import java.util.Vector;
 
-import javassist.bytecode.ByteArray;
-
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFTextStripper;
@@ -35,6 +43,9 @@ public class Article {
 
 	@Lob
 	private byte[] fullTextPdf;
+	
+	@ManyToOne
+	private Journal journal;
 
 	@ManyToMany
 	@JoinTable(name = "Article_Author", joinColumns = { @JoinColumn(name = "ArticleId") }, inverseJoinColumns = { @JoinColumn(name = "AuthorId") })
@@ -108,6 +119,14 @@ public class Article {
 			e.printStackTrace();
 		}
 		return writer.toString();
+	}
+
+	public void setJournal(Journal journal) {
+		this.journal = journal;
+	}
+
+	public Journal getJournal() {
+		return journal;
 	}
 
 }

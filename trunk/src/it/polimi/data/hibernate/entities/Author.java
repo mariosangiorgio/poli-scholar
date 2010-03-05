@@ -7,21 +7,21 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "AUTHORS")
-@NamedQuery(name = "findAuthorByName", query = "from Author author where author.name = :authorName")
+@NamedQuery(name = "findAuthorByName", query = "from Author author where author.name = :authorName and author.surname = :authorSurname")
 public class Author {
 	@Id @GeneratedValue
 	@Column(name = "AuthorId")
 	private Long identifier;
 	
 	private String name;
-	private String affiliation;
+	private String surname;
 	
 	@ManyToMany(mappedBy = "authors")
 	private List<Article> articles = new Vector<Article>();
 	
-	public Author(String name,String affiliation){
+	public Author(String name, String surname){
 		this.name = name;
-		this.affiliation = affiliation;
+		this.surname = surname;
 	}
 	
 	public Author(){
@@ -33,14 +33,6 @@ public class Author {
 
 	public String getName() {
 		return name;
-	}
-
-	public void setAffiliation(String affiliation) {
-		this.affiliation = affiliation;
-	}
-
-	public String getAffiliation() {
-		return affiliation;
 	}
 
 	@SuppressWarnings("unused")
@@ -62,5 +54,13 @@ public class Author {
 
 	public void addArticle(Article article) {
 		articles.add(article);
+	}
+
+	public void setSurname(String surname) {
+		this.surname = surname;
+	}
+
+	public String getSurname() {
+		return surname;
 	}
 }

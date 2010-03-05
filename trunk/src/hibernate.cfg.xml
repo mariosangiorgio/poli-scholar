@@ -17,8 +17,8 @@
     -->
     <property name="current_session_context_class">thread</property>
     <!-- this will show us all sql statements -->
-    <property name="hibernate.show_sql">true</property>
-	
+    <property name="hibernate.show_sql">false</property>
+    	
 	<property name="hibernate.hbm2ddl.auto">update</property>
 	<!-- set create to recreate a new database, update to maintain the existing data -->
 	<!-- TODO: Once the database structure is defined remove the drop option -->
