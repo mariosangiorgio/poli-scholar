@@ -8,8 +8,8 @@ import java.util.regex.Pattern;
 import org.tartarus.snowball.ext.porterStemmer;
 
 public class WordFrequencyAnalyzer {
-	porterStemmer stemmer;
-	Pattern nonAlphabetic	= Pattern.compile("[^a-zA-Z]");
+	private porterStemmer stemmer;
+	private Pattern nonAlphabetic	= Pattern.compile("[^a-zA-Z]");
 	
 	public WordFrequencyAnalyzer() {
 		stemmer = new porterStemmer();

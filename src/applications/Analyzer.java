@@ -15,10 +15,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 
 public class Analyzer {
-
-	/**
-	 * @param args
-	 */
+	
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
 		WordFrequencyAnalyzer analyzer = new WordFrequencyAnalyzer();
