@@ -1,8 +1,9 @@
 package it.polimi.data.hibernate.entities;
 
+import it.polimi.utils.TextStripper;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.List;
 import java.util.Vector;
 
@@ -19,8 +20,6 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.util.PDFTextStripper;
 import org.hibernate.annotations.Type;
 
 @Entity
@@ -43,7 +42,7 @@ public class Article {
 
 	@Lob
 	private byte[] fullTextPdf;
-	
+
 	@ManyToOne
 	private Journal journal;
 
@@ -105,20 +104,13 @@ public class Article {
 	}
 
 	public String getFullText() {
-		StringWriter writer = new StringWriter();
+		ByteArrayInputStream stream = new ByteArrayInputStream(fullTextPdf);
 		try {
-			ByteArrayInputStream stream = new ByteArrayInputStream(fullTextPdf);
-			PDDocument document = PDDocument.load(stream);
-			PDFTextStripper stripper = new PDFTextStripper();
-			stripper.writeText(document, writer);
-			document.close();
-			stream.close();
-			writer.close();
+			return TextStripper.getFullText(stream);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return writer.toString();
+		return "";
 	}
 
 	public void setJournal(Journal journal) {
