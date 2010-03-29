@@ -14,61 +14,78 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 
 import applications.analyzer.BayesianDocumentClassifier;
+import applications.analyzer.DocumentClassifier;
+import applications.analyzer.DocumentClassifierType;
 
 public class Classifier {
-	
+
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws FileNotFoundException {
-		
-		Session session = HibernateSessionManager.getNewSession();
-		session.beginTransaction();
-
-		Query query = session.getNamedQuery("getArticlesByYear");
-		query.setParameter("articleYear", 2009);
-		
-		Iterator result = query.iterate(); // I used this rather than query.list() to save memory
-		BayesianDocumentClassifier classifier;
-		String classifierFile = "classifier";
-		File file = new File(classifierFile);
-		
 		LongOpt longOptions[] = new LongOpt[8];
 		longOptions[0] = new LongOpt("train", LongOpt.NO_ARGUMENT, null, 't');
+
 		Getopt options = new Getopt("Classifier", args, "", longOptions);
 		boolean train = false;
-		while(options.getopt() != -1){
+		while (options.getopt() != -1) {
 			int option = options.getLongind();
-			switch(option){
+			switch (option) {
 			case 0:
 				train = true;
 				break;
 			}
 		}
 		
-		
-		if(train || !file.exists()){
-			 classifier = BayesianDocumentClassifier.getFromTrainingSet();
-			 classifier.save(classifierFile);
-		}
-		else{
+		DocumentClassifier classifier;
+		String classifierFile = "classifier";
+		File file = new File(classifierFile);
+
+		if (train || !file.exists()) {
+			classifier = BayesianDocumentClassifier
+					.getFromTrainingSet(DocumentClassifierType.NaiveBayesian);
+			classifier.save(classifierFile);
+		} else {
 			classifier = BayesianDocumentClassifier.load(classifierFile);
 		}
 
+		Session session = HibernateSessionManager.getNewSession();
+		session.beginTransaction();
 
-		while(result.hasNext()){
+		int firstYear = 1990;
+		int lastYear = 2010;
+
+		Query query = session.getNamedQuery("getArticlesInInterval");
+		query.setParameter("firstYear", firstYear);
+		query.setParameter("lastYear", lastYear);
+
+		Iterator result = query.iterate(); // I used this rather than
+											// query.list() to save memory
+		
+		while (result.hasNext()) {
 			Article article = (Article) result.next();
-			String label	= classifier.classify(article.getFullText());
-			
+			String label = classifier.classify(article.getFullText());
+
 			System.out.println(article.getTitle());
-			//System.out.println(article.getArticleAbstract());
+			System.out.println(article.getArticleAbstract());
 			System.out.println(label);
-			
-			Classification classification = new Classification(article, label);
+			System.out.println();
+
+			Classification classification;
+			classification = (Classification) session.getNamedQuery(
+					"getClassificationFromArticle").setParameter("article",
+					article).uniqueResult();
+			if (classification == null) {
+				classification = new Classification(article, label);
+			} else {
+				classification.setClassification(label);
+			}
 			session.saveOrUpdate(classification);
 			
+			session.flush();
 			session.evict(article);
 			session.evict(classification);
 			session.clear();
 		}
+		
 		session.close();
 		System.out.println("Done");
 	}

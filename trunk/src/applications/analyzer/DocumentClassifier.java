@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Random;
 import java.util.Vector;
@@ -28,7 +29,9 @@ import cc.mallet.pipe.TokenSequenceRemoveStopwords;
 import cc.mallet.types.Instance;
 import cc.mallet.types.InstanceList;
 
-public abstract class DocumentClassifier {
+public abstract class DocumentClassifier implements Serializable{
+	private static final long serialVersionUID = 8990469542892217623L;
+	
 	private Classifier classifier;
 	private Collection<String> labels;
 	
