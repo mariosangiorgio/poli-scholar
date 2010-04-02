@@ -30,7 +30,7 @@ public class IEEECrawler extends JournalCrawler {
 			.compile("<a name=\"Abstract\"><h2>Abstract</h2></a>\\s*<p>([^<]*)</p>");
 	private final Pattern articleIdentifierPattenr = Pattern
 			.compile("var arNumber='(\\d*)';");
-	
+
 	private Session session = HibernateSessionManager.getNewSession();
 
 	public IEEECrawler(String journalName, String journalIdentifier,
@@ -55,9 +55,10 @@ public class IEEECrawler extends JournalCrawler {
 	@Override
 	public Article getPaperData(String paperAddress) throws Exception {
 		Article article = null;
-		
-		System.out.println("Downloading the "+paperAddress+" paper information");
-		
+
+		System.out.println("Downloading the " + paperAddress
+				+ " paper information");
+
 		String dataPage = downloader.getPage(targetHost, paperAddress);
 
 		Matcher titleMatcher = titlePattern.matcher(dataPage);
@@ -105,30 +106,36 @@ public class IEEECrawler extends JournalCrawler {
 					}
 					article.addAuthor(author);
 				}
+				for (Author author : article.getAuthors()) {
+					author.addArticle(article);
+					session.saveOrUpdate(author);
+					session.evict(author);
+				}
 
-			}
-			for (Author author : article.getAuthors()) {
-				author.addArticle(article);
-				session.saveOrUpdate(author);
-				session.evict(author);
-			}
+				Matcher abstractMatcher = abstractPattern.matcher(dataPage);
+				if (abstractMatcher.find()) {
+					article.setArticleAbstract(abstractMatcher.group(1));
+				} else {
+					throw new Exception(
+							"The paper doesn't have and abstract and has been skipped");
+				}
 
-			Matcher abstractMatcher = abstractPattern.matcher(dataPage);
-			if (abstractMatcher.find()) {
-				article.setArticleAbstract(abstractMatcher.group(1));
+				Matcher identifierMatcher = articleIdentifierPattenr
+						.matcher(dataPage);
+				if (identifierMatcher.find()) {
+					String articleNumber = identifierMatcher.group(1), issueNumber = identifierMatcher
+							.group(1);
+					article.setFullTextPdf(downloader.getBinaryData(targetHost,
+							"/stampPDF/getPDF.jsp?tp=&arnumber="
+									+ articleNumber + "&isnumber="
+									+ issueNumber));
+				}
 			}
 			else{
-				throw new Exception("The paper doesn't have and abstract and has been skipped");
-			}
-
-			Matcher identifierMatcher = articleIdentifierPattenr
-					.matcher(dataPage);
-			if (identifierMatcher.find()) {
-				String articleNumber = identifierMatcher.group(1), issueNumber = identifierMatcher
-						.group(1);
-				article.setFullTextPdf(downloader.getBinaryData(targetHost,
-						"/stampPDF/getPDF.jsp?tp=&arnumber=" + articleNumber
-								+ "&isnumber=" + issueNumber));
+				session.evict(article);
+				session.clear();
+				
+				throw new Exception("Paper already downloaded");
 			}
 		}
 		return article;
@@ -162,7 +169,8 @@ public class IEEECrawler extends JournalCrawler {
 		} catch (Exception e) {
 			System.err.println("Something went wrong getting the "
 					+ issueIdentifier
-					+ " issue of IEEE Transactions on Software Engineering: "+e);
+					+ " issue of IEEE Transactions on Software Engineering: "
+					+ e);
 		}
 		return papersPages;
 	}
@@ -171,14 +179,13 @@ public class IEEECrawler extends JournalCrawler {
 	public void getYearArticles(int year) {
 		// Looking if the journal already appears in the database and creating
 		// it if it doesn't
-		if(session==null || !session.isOpen()){
+		if (session == null || !session.isOpen()) {
 			session = HibernateSessionManager.getNewSession();
 		}
 		session.beginTransaction();
-		
-		Journal journal = (Journal) session.getNamedQuery(
-				"findJournalByName").setParameter("journalName",
-				journalName).uniqueResult();
+
+		Journal journal = (Journal) session.getNamedQuery("findJournalByName")
+				.setParameter("journalName", journalName).uniqueResult();
 
 		if (journal == null) {
 			journal = new Journal(journalName);
@@ -208,7 +215,8 @@ public class IEEECrawler extends JournalCrawler {
 			}
 		} catch (Exception e) {
 			System.err.println("Something went wrong getting the " + year
-					+ " issues of IEEE Transactions on Software Engineering: "+e);
+					+ " issues of IEEE Transactions on Software Engineering: "
+					+ e);
 		}
 
 		for (String issueIdentifier : issuesIdentifiers) {
@@ -227,7 +235,7 @@ public class IEEECrawler extends JournalCrawler {
 
 				} catch (Exception e) {
 					System.err.println("Something went wrong downloading "
-							+ paperAddress + " from the IEEE library: "+e);
+							+ paperAddress + " from the IEEE library: " + e);
 				}
 			}
 		}

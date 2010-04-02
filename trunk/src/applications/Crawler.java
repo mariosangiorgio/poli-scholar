@@ -105,6 +105,7 @@ public class Crawler {
 		for(int year=from; year<= to; year++){
 			ieeeCrawler.getYearArticles(year);	
 		}
+		
 		System.out.println("Done");
 	}
 
