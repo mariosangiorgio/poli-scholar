@@ -18,15 +18,16 @@ public class Statistics {
 		Session session = HibernateSessionManager.getNewSession();
 		session.beginTransaction();
 
-		int firstYear = 1990;
+		int firstYear = 1976;
 		int lastYear = 2010;
-		int step = 5;
+		int step = 1;
 
 		HashMap<String, Vector<Float>> table;
 		table = new HashMap<String, Vector<Float>>();
 
 		int i = 0;
 		for (int year = firstYear; year <= lastYear; year += step) {
+			System.out.println("From: "+year+" to: "+(year+step));
 			Query query = session.getNamedQuery("getTotalNumerOfPapers");
 
 			query.setParameter("firstYear", year);
@@ -86,5 +87,6 @@ public class Statistics {
 			e.printStackTrace();
 		}
 		session.close();
+		System.out.println("Done");
 	}
 }
