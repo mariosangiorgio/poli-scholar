@@ -26,7 +26,7 @@ public class ACMCrawler extends JournalCrawler {
 	private static final Pattern authorPattern = Pattern
 			.compile("([^,]*), (.*)");
 	private static final Pattern abstractBeginsPattern = Pattern
-			.compile("<A NAME=\"abstract\">ABSTRACT</A></span>\\s*<p class=\"abstract\">\\s*(<par>|<p>)\\s*");
+			.compile("<A NAME=\"abstract\">ABSTRACT</A></span>\\s*<p class=\"abstract\">\\s*(<par>|<p>)?\\s*");
 	private static final Pattern abstractEndsPattern = Pattern.compile("(</par>|</p>)");
 	private static final Pattern fullTextLinkPattern = Pattern
 			.compile("<A NAME=\"FullText\" title=\"Pdf\" HREF=\"([^\"]*)\" target=\"_blank\">");
@@ -144,6 +144,7 @@ public class ACMCrawler extends JournalCrawler {
 					// Removing HTML tags
 					
 					String cleanedAbstract = rawAbstract.replaceAll("<.*>", "");
+					cleanedAbstract = cleanedAbstract.trim();
 					
 					article.setArticleAbstract(cleanedAbstract);
 				} else {
