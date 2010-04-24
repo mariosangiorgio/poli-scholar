@@ -50,8 +50,8 @@ public class Classifier {
 		Session session = HibernateSessionManager.getNewSession();
 		session.beginTransaction();
 
-		int firstYear = 1990;
-		int lastYear = 2010;
+		int firstYear = 1970;
+		int lastYear = 1989;
 
 		Query query = session.getNamedQuery("getArticlesInInterval");
 		query.setParameter("firstYear", firstYear);
@@ -65,7 +65,7 @@ public class Classifier {
 			String label = classifier.classify(article.getFullText());
 
 			System.out.println(article.getTitle());
-			System.out.println(article.getArticleAbstract());
+			//System.out.println(article.getArticleAbstract());
 			System.out.println(label);
 			System.out.println();
 

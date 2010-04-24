@@ -11,11 +11,11 @@ import javax.persistence.OneToOne;
 @NamedQueries( {
 		@NamedQuery(name = "getClassificationStatistics", query = "select c.classification as label, count(*) as numberOfPapers "
 				+ "from Classification c "
-				+ "where c.article.year between :firstYear and :lastYear "
+				+ "where c.year between :firstYear and :lastYear "
 				+ "group by c.classification " + "order by c.classification"),
 		@NamedQuery(name = "getTotalNumerOfPapers", query = "select count(*) "
 				+ "from Classification c "
-				+ "where c.article.year between :firstYear and :lastYear"),
+				+ "where c.year between :firstYear and :lastYear"),
 		@NamedQuery(name = "getClassificationFromArticle", query = "from Classification c where c.article = :article") })
 public class Classification {
 	@Id
@@ -26,6 +26,11 @@ public class Classification {
 	Article article;
 
 	String classification;
+	
+	/* 
+	 * The year value is duplicated here to improve analysis performances.
+	 */
+	int year;
 
 	public Classification() {
 	}
@@ -33,6 +38,7 @@ public class Classification {
 	public Classification(Article article, String classification) {
 		this.article = article;
 		this.classification = classification;
+		this.year = article.getYear();
 	}
 
 	public void setIdentifier(long identifier) {
@@ -57,6 +63,13 @@ public class Classification {
 
 	public void setClassification(String classification) {
 		this.classification = classification;
+	}
+	
+	public int getYear(){
+		return year;
+	}
+	public void setYear(int year){
+		this.year = year;
 	}
 
 }

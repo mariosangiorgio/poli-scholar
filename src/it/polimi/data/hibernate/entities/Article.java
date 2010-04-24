@@ -11,7 +11,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
@@ -48,7 +47,7 @@ public class Article {
 	private Journal journal;
 
 	@ManyToMany
-	@JoinTable(name = "Article_Author", joinColumns = { @JoinColumn(name = "ArticleId") }, inverseJoinColumns = { @JoinColumn(name = "AuthorId") })
+	@JoinTable(name = "Article_Author")
 	private List<Author> authors = new Vector<Author>();
 
 	@SuppressWarnings("unused")
