@@ -3,6 +3,7 @@ package applications;
 import gnu.getopt.Getopt;
 import gnu.getopt.LongOpt;
 import it.polimi.crawler.ACMCrawler;
+import it.polimi.crawler.ICSECrawler;
 import it.polimi.crawler.IEEECrawler;
 import it.polimi.crawler.JournalCrawler;
 import it.polimi.crawler.Website;
@@ -116,6 +117,11 @@ public class Crawler {
 				crawler = new IEEECrawler(journalName, journalIdentifier,
 						proxyHostname, proxyPort, proxyUsername, proxyPassword);
 				break;
+			case ICSE:
+				crawler = new ICSECrawler(journalName, journalIdentifier,
+						proxyHostname, proxyPort, proxyUsername, proxyPassword);
+				break;
+
 			}
 		} else {
 			System.out.println("No proxy login information provided");
@@ -127,6 +133,9 @@ public class Crawler {
 			case IEEE:
 				crawler = new IEEECrawler(journalName, journalIdentifier,
 						proxyHostname, proxyPort);
+				break;
+			case ICSE:
+				crawler = new ICSECrawler(journalName, journalIdentifier, proxyHostname, proxyPort);
 				break;
 			}
 		}
