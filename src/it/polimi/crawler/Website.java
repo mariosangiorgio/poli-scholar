@@ -1,5 +1,5 @@
 package it.polimi.crawler;
 
 public enum Website {
-	IEEE,ACM
+	IEEE,ACM,ICSE
 }

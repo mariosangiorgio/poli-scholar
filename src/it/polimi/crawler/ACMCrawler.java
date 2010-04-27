@@ -24,7 +24,7 @@ public class ACMCrawler extends JournalCrawler {
 	private static final Pattern authorListPattern = Pattern
 			.compile("author = \\{(.*)\\}");
 	private static final Pattern authorPattern = Pattern
-			.compile("([^,]*), (.*)");
+			.compile("([^,]*),\\s*(.*)");
 	private static final Pattern abstractBeginsPattern = Pattern
 			.compile("<A NAME=\"abstract\">ABSTRACT</A></span>\\s*<p class=\"abstract\">\\s*(<par>|<p>)?\\s*");
 	private static final Pattern abstractEndsPattern = Pattern.compile("(</par>|</p>)");
