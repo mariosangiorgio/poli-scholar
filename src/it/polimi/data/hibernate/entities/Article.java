@@ -25,8 +25,12 @@ import org.hibernate.annotations.Type;
 @Table(name = "ARTICLES")
 @NamedQueries( {
 		@NamedQuery(name = "getArticlesByYear", query = "from Article article where article.year = :articleYear"),
+		
 		@NamedQuery(name = "getArticlesInInterval", query ="from Article article where article.year between :firstYear and :lastYear"),
-		@NamedQuery(name = "findArticleByTitle", query = "from Article article where article.title = :title") })
+		@NamedQuery(name = "getJournalArticlesInInterval", query ="from Article article where article.journal = :journal and article.year between :firstYear and :lastYear"),
+		
+		@NamedQuery(name = "findArticleByTitle", query = "from Article article where article.title = :title"),
+		@NamedQuery(name = "findArticleByTitleAndJournal", query = "from Article article where article.title = :title and article.journal = :journal") })
 public class Article {
 	@Id
 	@GeneratedValue

@@ -1,6 +1,7 @@
 package applications;
 
 import it.polimi.data.hibernate.HibernateSessionManager;
+import it.polimi.data.hibernate.entities.Journal;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -18,27 +19,35 @@ public class Statistics {
 		Session session = HibernateSessionManager.getNewSession();
 		session.beginTransaction();
 
-		int firstYear = 1976;
-		int lastYear = 2010;
-		int step = 1;
+		int firstYear = 1992;
+		int lastYear = 2009;
+		int step = 3;
 
 		HashMap<String, Vector<Float>> table;
 		table = new HashMap<String, Vector<Float>>();
+		
+		String journalName = "ACM Transactions on Software Engineering and Methodology";
+
+		Journal journal = (Journal) session.getNamedQuery("findJournalByName")
+		.setParameter("journalName", journalName).uniqueResult();
 
 		int i = 0;
 		for (int year = firstYear; year <= lastYear; year += step) {
 			System.out.println("From: "+year+" to: "+(year+step));
-			Query query = session.getNamedQuery("getTotalNumerOfPapers");
+			Query query = session.getNamedQuery("getTotalNumerOfPapersByJournal");
 
 			query.setParameter("firstYear", year);
 			query.setParameter("lastYear", year + step - 1);
+			query.setParameter("journal",journal);
 
 			Long total = (Long) query.uniqueResult();
 
-			query = session.getNamedQuery("getClassificationStatistics");
+			query = session.getNamedQuery("getClassificationStatisticsByJournal");
 
 			query.setParameter("firstYear", year);
 			query.setParameter("lastYear", year + step - 1);
+			query.setParameter("journal",journal);
+
 
 			List result = query.list();
 			for (Object o : result) {
