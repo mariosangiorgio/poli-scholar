@@ -58,14 +58,18 @@ public abstract class DocumentClassifier implements Serializable{
 		trainer.setValidationInstances(instanceSets[1]);
 		classifier = trainer.train(instanceSets[0]);
 
+		System.out.println(" Dataset");
 		System.out.println(instances.targetLabelDistribution());
+		System.out.println(" Documents used for training");
 		System.out.println(instanceSets[0].targetLabelDistribution());
+		System.out.println(" Documents used for testing");
 		System.out.println(instanceSets[1].targetLabelDistribution());
 		
 		Trial trial = new Trial(classifier,instanceSets[1]);
-		System.out.println("Testing summary:");
+		System.out.println(" Test statistics:");
 		System.out.println("Accuracy:\t"+trial.getAccuracy());
 		System.out.println("Average rank:\t"+trial.getAverageRank());
+		System.out.println();
 		for(String label : labels){
 			System.out.println(label+"\tPrecision: "+trial.getPrecision(label)+"\tRecall: "+trial.getRecall(label)+"\tFscore: "+trial.getF1(label));
 		}
