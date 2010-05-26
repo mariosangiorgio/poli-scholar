@@ -10,6 +10,8 @@ import applications.analyzer.DocumentClassifierType;
 
 public class Bidder {
 	private DocumentClassifier classifier;
+	private final static String pathToReviewers   = "automaticBidding/reviewers";
+	private final static String pathToSubmissions = "automaticBidding/submissions";
 	
 	public static void main(String[] args){
 		Bidder bidder = new Bidder();
@@ -18,13 +20,14 @@ public class Bidder {
 	
 	public Bidder(){
 		//TODO: Find a way to have the papers weighted according to their age
-		classifier = DocumentClassifier.getFromTrainingSet(DocumentClassifierType.NaiveBayesian,"automaticBidding/reviewers");
+		classifier = DocumentClassifier.getFromTrainingSet(DocumentClassifierType.NaiveBayesian,pathToReviewers);
 	}
 	
 	public void generateBidding(){
-		String pathToSubmissions = "automaticBidding/submissions";
 		File submissionsFolder = new File(pathToSubmissions);
 		
+		System.out.println();
+		System.out.println(" Biddings:");
 		for(String documentName : submissionsFolder.list()){
 			File document = new File(pathToSubmissions+"/"+documentName);
 			
