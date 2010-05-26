@@ -75,8 +75,11 @@ public class IEEECrawler extends JournalCrawler {
 						"This paper is an editorial, a reviewer list or an index");
 			}
 
-			article = (Article) session.getNamedQuery("findArticleByTitle")
-					.setParameter("title", title).uniqueResult();
+			Query articleQuery = session.getNamedQuery("findArticleByTitleAndJournal");
+			articleQuery.setParameter("title", title);
+			articleQuery.setParameter("journal", journal);
+			
+			article = (Article) articleQuery.uniqueResult();
 
 			if (article == null) {
 				article = new Article();

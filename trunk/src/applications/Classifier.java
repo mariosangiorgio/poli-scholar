@@ -5,6 +5,7 @@ import gnu.getopt.LongOpt;
 import it.polimi.data.hibernate.HibernateSessionManager;
 import it.polimi.data.hibernate.entities.Article;
 import it.polimi.data.hibernate.entities.Classification;
+import it.polimi.data.hibernate.entities.Journal;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -41,7 +42,7 @@ public class Classifier {
 
 		if (train || !file.exists()) {
 			classifier = BayesianDocumentClassifier
-					.getFromTrainingSet(DocumentClassifierType.NaiveBayesian);
+					.getFromTrainingSet(DocumentClassifierType.NaiveBayesian,"resources/TrainingSet");
 			classifier.save(classifierFile);
 		} else {
 			classifier = BayesianDocumentClassifier.load(classifierFile);
@@ -50,12 +51,18 @@ public class Classifier {
 		Session session = HibernateSessionManager.getNewSession();
 		session.beginTransaction();
 
-		int firstYear = 1970;
-		int lastYear = 1989;
+		// Parameters
+		int firstYear = 1992;
+		int lastYear =  2009;
+		String journalName = "IEEE Transactions on Software Engineering";
 
-		Query query = session.getNamedQuery("getArticlesInInterval");
+		Journal journal = (Journal) session.getNamedQuery("findJournalByName")
+		.setParameter("journalName", journalName).uniqueResult();
+		
+		Query query = session.getNamedQuery("getJournalArticlesInInterval");
 		query.setParameter("firstYear", firstYear);
 		query.setParameter("lastYear", lastYear);
+		query.setParameter("journal", journal);
 
 		Iterator result = query.iterate(); // I used this rather than
 											// query.list() to save memory
@@ -68,7 +75,7 @@ public class Classifier {
 			//System.out.println(article.getArticleAbstract());
 			System.out.println(label);
 			System.out.println();
-
+			
 			Classification classification;
 			classification = (Classification) session.getNamedQuery(
 					"getClassificationFromArticle").setParameter("article",

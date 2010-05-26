@@ -16,6 +16,14 @@ import javax.persistence.OneToOne;
 		@NamedQuery(name = "getTotalNumerOfPapers", query = "select count(*) "
 				+ "from Classification c "
 				+ "where c.year between :firstYear and :lastYear"),
+		@NamedQuery(name = "getClassificationStatisticsByJournal", query = "select c.classification as label, count(*) as numberOfPapers "
+					+ "from Classification c "
+					+ "where c.year between :firstYear and :lastYear and c.article.journal = :journal "
+					+ "group by c.classification " + "order by c.classification"),
+		@NamedQuery(name = "getTotalNumerOfPapersByJournal", query = "select count(*) "
+					+ "from Classification c "
+					+ "where c.year between :firstYear and :lastYear and c.article.journal = :journal "),
+
 		@NamedQuery(name = "getClassificationFromArticle", query = "from Classification c where c.article = :article") })
 public class Classification {
 	@Id

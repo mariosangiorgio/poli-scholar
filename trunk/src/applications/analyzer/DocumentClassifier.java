@@ -35,7 +35,12 @@ public abstract class DocumentClassifier implements Serializable{
 	private Classifier classifier;
 	private Collection<String> labels;
 	
+	private String pathToTrainingSet;
 	protected abstract ClassifierTrainer<?> getTrainer();
+	
+	protected DocumentClassifier(String pathToTrainingSet){
+		this.pathToTrainingSet = pathToTrainingSet;
+	}
 	
 	public String classify(String input){
 		Classification classification = classifier.classify(input);
@@ -80,15 +85,14 @@ public abstract class DocumentClassifier implements Serializable{
 		InstanceList instancelist = new InstanceList (instancePipe);
 		
 		// Reading the documents and labeling them with their directory name
-		String basePath = "resources/trainingSet";
-		File trainingSetRoot = new File(basePath);
+		File trainingSetRoot = new File(pathToTrainingSet);
 		labels = new Vector<String>();
 		for(String labelName:trainingSetRoot.list()){
-			File label = new File(basePath+"/"+labelName);
+			File label = new File(pathToTrainingSet+"/"+labelName);
 			if(label.isDirectory() && !labelName.startsWith(".")){
 				labels.add(labelName);
 				for(String documentName:label.list()){
-					File document = new File(basePath+"/"+labelName+"/"+documentName);
+					File document = new File(pathToTrainingSet+"/"+labelName+"/"+documentName);
 					if(!documentName.startsWith(".") && document.isFile()){
 						try {
 							String fullText = TextStripper.getFullText(document);
@@ -103,11 +107,11 @@ public abstract class DocumentClassifier implements Serializable{
 		return instancelist;
 	}
 		
-	public static DocumentClassifier getFromTrainingSet(DocumentClassifierType type) {
+	public static DocumentClassifier getFromTrainingSet(DocumentClassifierType type, String pathToTrainingSet) {
 		DocumentClassifier classifier = null;
 		switch (type) {
 		case NaiveBayesian:
-			classifier = new BayesianDocumentClassifier();
+			classifier = new BayesianDocumentClassifier(pathToTrainingSet);
 			break;
 		}
 		classifier.train();

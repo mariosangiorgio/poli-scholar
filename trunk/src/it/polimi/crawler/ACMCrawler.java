@@ -92,8 +92,11 @@ public class ACMCrawler extends JournalCrawler {
 			String title = StringEscapeUtils
 					.unescapeHtml(titleMatcher.group(1));
 			
-			article = (Article) session.getNamedQuery("findArticleByTitle")
-					.setParameter("title", title).uniqueResult();
+			Query articleQuery = session.getNamedQuery("findArticleByTitleAndJournal");
+			articleQuery.setParameter("title", title);
+			articleQuery.setParameter("journal", journal);
+			
+			article = (Article) articleQuery.uniqueResult();
 
 			if (article == null) {
 				article = new Article();
