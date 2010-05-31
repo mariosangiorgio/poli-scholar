@@ -12,7 +12,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.http.HttpHost;
 import org.hibernate.Query;
 
-public class ACMCrawler extends JournalCrawler {
+public class ACMCrawler extends WebCrawler {
 	private static final Pattern issueListPattern = Pattern
 			.compile("toc.cfm\\?id=(\\d*)&[^>]*>Issue \\d* <small>\\(\\w* (\\d*)\\)");
 	private static final Pattern articleListPattern = Pattern

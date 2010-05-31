@@ -17,7 +17,7 @@ import org.hibernate.Session;
  * 
  * @author Mario Sangiorgio
  */
-public abstract class JournalCrawler {
+public abstract class WebCrawler {
 	protected Journal journal;
 	protected String journalCode;
 
@@ -26,7 +26,7 @@ public abstract class JournalCrawler {
 
 	protected Session session;
 
-	protected JournalCrawler(String journalName, String journalIdentifier,
+	protected WebCrawler(String journalName, String journalIdentifier,
 			HttpHost targetHost) {
 		// Looking if the journal already appears in the database and creating
 		// it if it doesn't
@@ -52,13 +52,13 @@ public abstract class JournalCrawler {
 		this.targetHost = targetHost;
 	}
 
-	protected JournalCrawler(String journalName, String journalIdentifier,
+	protected WebCrawler(String journalName, String journalIdentifier,
 			HttpHost targetHost, String proxyHostname, int proxyPort) {
 		this(journalName, journalIdentifier, targetHost);
 		downloader.setupProxy(proxyHostname, proxyPort);
 	}
 
-	protected JournalCrawler(String journalName, String journalIdentifier,
+	protected WebCrawler(String journalName, String journalIdentifier,
 			HttpHost targetHost, String proxyHostname, int proxyPort,
 			String username, String password) {
 		this(journalName, journalIdentifier, targetHost);
