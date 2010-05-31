@@ -12,7 +12,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.http.HttpHost;
 import org.hibernate.Query;
 
-public class IEEECrawler extends JournalCrawler {
+public class IEEECrawler extends WebCrawler {
 	private static final Pattern issueIdentifierPattern = Pattern
 			.compile("\\[\"[^\"]*\",\"(\\d*)\"\\]");
 	private static final Pattern articleListPattern = Pattern
@@ -54,9 +54,9 @@ public class IEEECrawler extends JournalCrawler {
 
 		System.out.println("Downloading the " + paperAddress
 				+ " paper information");
-
+		
 		String dataPage = downloader.getPage(targetHost, paperAddress);
-
+		
 		Matcher titleMatcher = titlePattern.matcher(dataPage);
 		Matcher authorsMatcher = authorsPattern.matcher(dataPage);
 		if (titleMatcher.find()) {

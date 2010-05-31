@@ -4,9 +4,10 @@ import gnu.getopt.Getopt;
 import gnu.getopt.LongOpt;
 import it.polimi.crawler.ACMCrawler;
 import it.polimi.crawler.ICSECrawler;
+import it.polimi.crawler.IEEEConferenceCrawler;
 import it.polimi.crawler.IEEECrawler;
-import it.polimi.crawler.JournalCrawler;
-import it.polimi.crawler.Website;
+import it.polimi.crawler.WebCrawler;
+import it.polimi.crawler.DataSource;
 import it.polimi.data.hibernate.HibernateSessionManager;
 import it.polimi.webClient.DownloadException;
 
@@ -26,7 +27,7 @@ public class Crawler {
 		int from = -1, to = -1;
 		StringBuffer buffer = new StringBuffer();
 		boolean cleanup = false;
-		Website website = null;
+		DataSource website = null;
 
 		LongOpt longOptions[] = new LongOpt[9];
 		longOptions[0] = new LongOpt("journalName", LongOpt.REQUIRED_ARGUMENT,
@@ -78,7 +79,7 @@ public class Crawler {
 			case 7:
 				printUsage();
 			case 8:
-				website = Website.valueOf(options.getOptarg());
+				website = DataSource.valueOf(options.getOptarg());
 			default:
 				break;
 			}
@@ -103,7 +104,7 @@ public class Crawler {
 			return;
 		}
 
-		JournalCrawler crawler = null;
+		WebCrawler crawler = null;
 
 		if (proxyUsername != null && proxyPassword != null) {
 			System.out
@@ -113,15 +114,18 @@ public class Crawler {
 				crawler = new ACMCrawler(journalName, journalIdentifier,
 						proxyHostname, proxyPort, proxyUsername, proxyPassword);
 				break;
+			case ACM_ICSE:
+				crawler = new ICSECrawler(journalName, journalIdentifier,
+						proxyHostname, proxyPort, proxyUsername, proxyPassword);
+				break;
 			case IEEE:
 				crawler = new IEEECrawler(journalName, journalIdentifier,
 						proxyHostname, proxyPort, proxyUsername, proxyPassword);
 				break;
-			case ICSE:
-				crawler = new ICSECrawler(journalName, journalIdentifier,
+			case IEEE_CONFERENCE:
+				crawler = new IEEEConferenceCrawler(journalName, journalIdentifier,
 						proxyHostname, proxyPort, proxyUsername, proxyPassword);
 				break;
-
 			}
 		} else {
 			System.out.println("No proxy login information provided");
@@ -130,19 +134,23 @@ public class Crawler {
 				crawler = new ACMCrawler(journalName, journalIdentifier,
 						proxyHostname, proxyPort);
 				break;
+			case ACM_ICSE:
+				crawler = new ICSECrawler(journalName, journalIdentifier, proxyHostname, proxyPort);
+				break;
 			case IEEE:
 				crawler = new IEEECrawler(journalName, journalIdentifier,
 						proxyHostname, proxyPort);
 				break;
-			case ICSE:
-				crawler = new ICSECrawler(journalName, journalIdentifier, proxyHostname, proxyPort);
+			case IEEE_CONFERENCE:
+				crawler = new IEEEConferenceCrawler(journalName, journalIdentifier,
+						proxyHostname, proxyPort);
 				break;
 			}
 		}
 
 		try {
 			crawler.testConnection();
-			// This is also useful to make the ieee website recognize the
+			// This is also useful to make the website recognize the
 			// Politecnico subscription
 		} catch (Exception e) {
 			System.err.println("Connection problems");
