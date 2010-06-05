@@ -38,7 +38,7 @@ public class ContentDownloader {
 		HttpGet request = new HttpGet(content);
         request.setHeader(HTTP.USER_AGENT,"Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_1; en-us) AppleWebKit/532.3+ (KHTML, like Gecko) Version/4.0.3 Safari/531.9");
         request.setHeader("Accept-Language","en-us,en;q=0.5");
-        // Other possibily useful headers
+        // Other possibly useful headers
         //request.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
 		//request.setHeader("Accept-Encoding","gzip,deflate");
 		//request.setHeader("Accept-Charset","ISO-8859-1,utf-8;q=0.7,*;q=0.7");

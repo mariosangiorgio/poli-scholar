@@ -4,44 +4,32 @@ import it.polimi.utils.TextStripper;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Vector;
 
-import applications.analyzer.DocumentClassifier;
-import applications.analyzer.DocumentClassifierType;
+public abstract class Bidder {
+	abstract public void train(String pathToReviewers);
 
-public class Bidder {
-	private DocumentClassifier classifier;
-	private final static String pathToReviewers   = "automaticBidding/reviewers";
-	private final static String pathToSubmissions = "automaticBidding/submissions";
-	
-	public static void main(String[] args){
-		Bidder bidder = new Bidder();
-		bidder.generateBidding();
-	}
-	
-	public Bidder(){
-		//TODO: Find a way to have the papers weighted according to their age
-		classifier = DocumentClassifier.getFromTrainingSet(DocumentClassifierType.NaiveBayesian,pathToReviewers);
-	}
-	
-	public void generateBidding(){
-		File submissionsFolder = new File(pathToSubmissions);
+	abstract public String getReviewer(String documentContent);
+
+	public Collection<Bidding> getReviewers(String pathToSubmissions) {
+		Collection<Bidding> biddings = new Vector<Bidding>();
 		
-		System.out.println();
-		System.out.println(" Biddings:");
-		for(String documentName : submissionsFolder.list()){
-			File document = new File(pathToSubmissions+"/"+documentName);
-			
-			if(!documentName.startsWith(".") && document.isFile()){
+		File submissionsFolder = new File(pathToSubmissions);
+		for (String documentName : submissionsFolder.list()) {
+			File document = new File(pathToSubmissions + "/" + documentName);
+
+			if (!documentName.startsWith(".") && document.isFile()) {
 				try {
 					String fullText = TextStripper.getFullText(document);
-					String classification = classifier.classify(fullText);
+					String reviewer = getReviewer(fullText);
 					
-					System.out.println(documentName+"\t"+classification);
-					
+					biddings.add(new Bidding(documentName, reviewer));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
-		}	
+		}
+		return biddings;
 	}
 }
