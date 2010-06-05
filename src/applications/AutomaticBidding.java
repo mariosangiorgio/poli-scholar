@@ -9,7 +9,12 @@ public class AutomaticBidding {
 		String pathToReviewers = "automaticBidding/reviewers";
 		String pathToSubmissions = "automaticBidding/submissions";
 		
-		Bidder bidder = new NearestNeighborBidder(5);
+		Bidder bidder;
+		//TODO: write a menu to select the bidder
+		// Uncomment the bidder you want to use
+		bidder = new NearestNeighborBidder(5);
+		//bidder = new BayesianBidder();
+		
 		bidder.train(pathToReviewers);
 		for(Bidding bidding : bidder.getReviewers(pathToSubmissions)){
 			System.out.println(bidding+"\n");

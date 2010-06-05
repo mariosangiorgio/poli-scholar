@@ -12,7 +12,8 @@ public class CosineDistance implements DistanceFunction {
 			   normFirstInstance = 0,
 			   normSecondInstance = 0;
 		
-		for(int i=1;i<first.numAttributes();i++){
+		//This cycle starts from to skip the filename and the class information
+		for(int i=2;i<first.numAttributes();i++){
 			dotProduct		   += first.value(i)*second.value(i);
 			normFirstInstance  += first.value(i)*first.value(i);
 			normSecondInstance += second.value(i)*second.value(i);
@@ -80,6 +81,7 @@ public class CosineDistance implements DistanceFunction {
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Enumeration listOptions() {
 		return null;

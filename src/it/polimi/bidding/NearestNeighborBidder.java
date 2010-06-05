@@ -1,8 +1,7 @@
 package it.polimi.bidding;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import weka.core.CosineDistance;
@@ -33,46 +32,69 @@ public class NearestNeighborBidder extends Bidder {
 		converter.setDoNotOperateOnPerClassBasis(true);
 		converter.setOutputWordCounts(true);
 		converter.setIDFTransform(true);
+		int[] attributes = new int[1];
+		attributes[0] = 0;
+		converter.setAttributeIndicesArray(attributes);
 	}
 
 	@Override
 	public String getReviewer(String documentContent) {
-		String neighbor = null;
+		String selectedReviewer = null;
 		Instance document;
+		HashMap<String,Integer> possibleReviewers = new HashMap<String, Integer>();
 
 		double[] newInst = null;
-		newInst = new double[2];
-		newInst[0] = (double) dataSet.attribute(0).addStringValue(documentContent);
+		newInst = new double[3];
+		newInst[0] = (double) dataSet.attribute(0).addStringValue(
+				documentContent);
 		/*
-		 * No value is set for newInst at position 1,
-		 * that is the class value
+		 * No value is set for newInst at position 1, that is the class value
 		 */
 		document = new DenseInstance(1.0, newInst);
 		document.setDataset(dataSet);
-		
+
 		try {
 			converter.input(document);
 			document = converter.output();
-			
-			Instances neighbors = classifier.kNearestNeighbours(document, numberOfNeighbors);
+
+			Instances neighbors = classifier.kNearestNeighbours(document,
+					numberOfNeighbors);
 			Iterator<Instance> iterator = neighbors.iterator();
-			
+
 			while (iterator.hasNext()) {
 				Instance instance = iterator.next();
-				System.out.println(instance
+				String filename = instance.stringValue(0);
+				String reviewer = instance.classAttribute().value(
+						(int) instance.classValue());
+				System.out.println(filename
 						+ ", "
-						+ instance.classAttribute().value(
-								(int) instance.classValue()));
+						+ reviewer);
+				if(possibleReviewers.containsKey(reviewer)){
+					possibleReviewers.put(reviewer, possibleReviewers.get(reviewer) + 1);
+				}
+				else{
+					possibleReviewers.put(reviewer, 1);
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return neighbor;
+		int maxFound = 0;
+		for(String reviewer : possibleReviewers.keySet()){
+			int count = possibleReviewers.get(reviewer);
+			if(count > maxFound){
+				maxFound = count;
+				selectedReviewer = reviewer;
+			}
+			System.out.println(reviewer+"\t"+count);
+		}
+		return selectedReviewer;
 	}
 
 	@Override
 	public void train(String pathToReviewers) {
 		TextDirectoryLoader loader = new DocumentLoader();
+		loader.setOutputFilename(true);
 		try {
 			loader.setDirectory(new File(pathToReviewers));
 			dataSet = loader.getDataSet();
