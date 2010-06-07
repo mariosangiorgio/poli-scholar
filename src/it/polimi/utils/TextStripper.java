@@ -43,8 +43,15 @@ public class TextStripper {
 	
 	public static String getFullText(File document) throws IOException{
 		PDDocument fullTextDocument = PDDocument.load(document);
-		String fullText = getFullText(fullTextDocument);
-		fullTextDocument.close();
+		String fullText;
+		try{
+			fullText = getFullText(fullTextDocument);
+		}
+		finally
+		{	
+			if(fullTextDocument != null)
+				fullTextDocument.close();
+		}
 		return fullText;		
 	}
 	
