@@ -25,7 +25,7 @@ public abstract class Bidder {
 					String reviewer = getReviewer(fullText);
 					
 					biddings.add(new Bidding(documentName, reviewer));
-				} catch (IOException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
