@@ -101,7 +101,7 @@ public abstract class DocumentClassifier implements Serializable{
 						try {
 							String fullText = TextStripper.getFullText(document);
 							instancelist.addThruPipe(new Instance(fullText, labelName, documentName, null));
-						} catch (IOException e) {
+						} catch (Exception e) {
 							e.printStackTrace();
 						}
 					}

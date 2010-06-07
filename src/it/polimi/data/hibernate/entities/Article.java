@@ -111,7 +111,7 @@ public class Article {
 		ByteArrayInputStream stream = new ByteArrayInputStream(fullTextPdf);
 		try {
 			return TextStripper.getFullText(stream);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return "";

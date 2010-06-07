@@ -15,33 +15,35 @@ public class TextStripper {
 	private static final Pattern dash				 = Pattern.compile("\\-\\s*");
 	private static final Pattern multipleWhitespaces = Pattern.compile("\\s+");
 	
-	public static String getFullText(PDDocument fullTextDocument) throws IOException{
-		String fullText;
+	public static String getFullText(PDDocument fullTextDocument) throws IOException, PDFEncryptedException{
+		if(!fullTextDocument.isEncrypted()){
+			String fullText;
 		
-		StringWriter writer = new StringWriter();
-		PDFTextStripper stripper = new PDFTextStripper();
-		stripper.setSuppressDuplicateOverlappingText(false);
-		stripper.setSpacingTolerance(0.5f);
-		stripper.writeText(fullTextDocument, writer);
-		writer.close();
-		
-		fullText = writer.toString();
-		
-		Matcher matcher;
-		// Removing dashes to rebuild hyphenated words 
-		matcher	 = dash.matcher(fullText);
-		fullText = matcher.replaceAll("");
-		// Dropping non alphabetic characters
-		matcher	 = nonAlphabetic.matcher(fullText);
-		fullText = matcher.replaceAll(" ");
-		// Merging multiple whitespaces
-		matcher	 = multipleWhitespaces.matcher(fullText);
-		fullText = matcher.replaceAll(" ");
-		
-		return fullText;
+			StringWriter writer = new StringWriter();
+			PDFTextStripper stripper = new PDFTextStripper();
+			stripper.setSuppressDuplicateOverlappingText(false);
+			stripper.setSpacingTolerance(0.5f);
+			stripper.writeText(fullTextDocument, writer);
+			writer.close();
+			
+			fullText = writer.toString();
+			
+			Matcher matcher;
+			// Removing dashes to rebuild hyphenated words 
+			matcher	 = dash.matcher(fullText);
+			fullText = matcher.replaceAll("");
+			// Dropping non alphabetic characters
+			matcher	 = nonAlphabetic.matcher(fullText);
+			fullText = matcher.replaceAll(" ");
+			// Merging multiple whitespaces
+			matcher	 = multipleWhitespaces.matcher(fullText);
+			fullText = matcher.replaceAll(" ");
+			return fullText;
+		}else
+			throw new PDFEncryptedException();
 	}
 	
-	public static String getFullText(File document) throws IOException{
+	public static String getFullText(File document) throws IOException, PDFEncryptedException{
 		PDDocument fullTextDocument = PDDocument.load(document);
 		String fullText;
 		try{
@@ -55,7 +57,7 @@ public class TextStripper {
 		return fullText;		
 	}
 	
-	public static String getFullText(InputStream document) throws IOException{
+	public static String getFullText(InputStream document) throws IOException, PDFEncryptedException{
 		PDDocument fullTextDocument = PDDocument.load(document);
 		String fullText = getFullText(fullTextDocument);
 		fullTextDocument.close();
