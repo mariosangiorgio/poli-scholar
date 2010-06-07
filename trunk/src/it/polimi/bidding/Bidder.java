@@ -3,7 +3,6 @@ package it.polimi.bidding;
 import it.polimi.utils.TextStripper;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Vector;
 
@@ -21,8 +20,10 @@ public abstract class Bidder {
 
 			if (!documentName.startsWith(".") && document.isFile()) {
 				try {
+					System.out.println(documentName);
 					String fullText = TextStripper.getFullText(document);
 					String reviewer = getReviewer(fullText);
+					System.out.println("Selected reviewer:\t"+reviewer+"\n\n");
 					
 					biddings.add(new Bidding(documentName, reviewer));
 				} catch (Exception e) {
