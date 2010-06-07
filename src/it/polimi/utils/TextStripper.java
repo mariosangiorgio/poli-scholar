@@ -1,5 +1,7 @@
 package it.polimi.utils;
 
+import it.polimi.data.hibernate.entities.PDFEncryptedException;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
