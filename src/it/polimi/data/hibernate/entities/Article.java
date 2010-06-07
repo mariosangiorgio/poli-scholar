@@ -3,7 +3,6 @@ package it.polimi.data.hibernate.entities;
 import it.polimi.utils.TextStripper;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.List;
 import java.util.Vector;
 
