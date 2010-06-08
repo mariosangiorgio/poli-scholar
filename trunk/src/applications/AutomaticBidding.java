@@ -1,7 +1,9 @@
 package applications;
 
+import it.polimi.bidding.BayesianBidder;
 import it.polimi.bidding.Bidder;
 import it.polimi.bidding.Bidding;
+import it.polimi.bidding.BiddingMethods;
 import it.polimi.bidding.NearestNeighborBidder;
 
 public class AutomaticBidding {
@@ -11,7 +13,9 @@ public class AutomaticBidding {
 
 		String filename = "automaticBidding/savedBidder";
 		boolean load = true;
-
+		
+		BiddingMethods method = BiddingMethods.NaiveBayesian;
+		
 		// TODO: write a menu to select the bidder
 		
 		Bidder bidder;
@@ -19,8 +23,16 @@ public class AutomaticBidding {
 			bidder = Bidder.load(filename);
 		} else {
 			// Uncomment the bidder you want to use
-			bidder = new NearestNeighborBidder(5);
-			// bidder = new BayesianBidder();
+			switch (method) {
+			case NaiveBayesian:
+				bidder = new BayesianBidder();
+				break;
+			case VectorSpaceModel:
+				bidder = new NearestNeighborBidder(5);
+			default:
+				bidder = null;
+				break;
+			}
 			bidder.train(pathToReviewers);
 			bidder.save(filename);
 		}
