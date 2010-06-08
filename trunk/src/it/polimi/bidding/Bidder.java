@@ -3,10 +3,42 @@ package it.polimi.bidding;
 import it.polimi.utils.TextStripper;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Vector;
 
-public abstract class Bidder {
+public abstract class Bidder implements Serializable{
+	private static final long serialVersionUID = 7609771369038960694L;
+	
+	public void save(String filename) throws IOException{
+		FileOutputStream file = new FileOutputStream(filename);
+		ObjectOutputStream outputStream = new ObjectOutputStream(file);
+		
+		outputStream.writeObject(this);
+		
+		outputStream.close();
+		file.close();
+	}
+	
+	static public Bidder load(String filename) throws IOException, ClassNotFoundException{
+		Bidder bidder = null;
+		
+		FileInputStream file = new FileInputStream(filename);
+		ObjectInputStream inputStream = new ObjectInputStream(file);
+		
+		bidder = (Bidder) inputStream.readObject();
+		
+		inputStream.close();
+		file.close();
+		
+		return bidder;
+	}
+
 	abstract public void train(String pathToReviewers);
 
 	abstract public String getReviewer(String documentContent);

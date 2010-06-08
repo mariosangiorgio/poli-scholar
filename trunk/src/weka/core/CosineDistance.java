@@ -1,10 +1,13 @@
 package weka.core;
 
+import java.io.Serializable;
 import java.util.Enumeration;
 
 import weka.core.neighboursearch.PerformanceStats;
 
-public class CosineDistance implements DistanceFunction {
+public class CosineDistance implements DistanceFunction, Serializable {
+	
+	private static final long serialVersionUID = -219915854383991745L;
 
 	@Override
 	public double distance(Instance first, Instance second) {

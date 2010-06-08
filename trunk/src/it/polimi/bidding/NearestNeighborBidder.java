@@ -1,6 +1,8 @@
 package it.polimi.bidding;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -17,14 +19,27 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.StringToWordVector;
 
 public class NearestNeighborBidder extends Bidder {
-	private NearestNeighbourSearch classifier;
+	private static final long serialVersionUID = 2212565506279600424L;
+
 	private int numberOfNeighbors;
-	private StringToWordVector converter;
+	private NearestNeighbourSearch classifier;
+
+	transient private StringToWordVector converter;
 	private Instances dataSet;
 
 	public NearestNeighborBidder(int numberOfNeighbors) {
 		this.numberOfNeighbors = numberOfNeighbors;
+		initializeConverter();
+	}
 
+	// Added to properly set-up the converter after the de-serialization
+	private void readObject(ObjectInputStream ois)
+			throws ClassNotFoundException, IOException {
+		ois.defaultReadObject();
+		initializeConverter();
+	}
+
+	private void initializeConverter() {
 		converter = new StringToWordVector();
 		converter.setStemmer(new SnowballStemmer("porter"));
 		converter.setUseStoplist(true);
@@ -35,13 +50,24 @@ public class NearestNeighborBidder extends Bidder {
 		int[] attributes = new int[1];
 		attributes[0] = 0;
 		converter.setAttributeIndicesArray(attributes);
+		
+		if(dataSet != null){
+			// Here I am de-serializing
+			try {
+				converter.setInputFormat(dataSet);
+				Filter.useFilter(dataSet, converter);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
 	}
 
 	@Override
 	public String getReviewer(String documentContent) {
 		String selectedReviewer = null;
 		Instance document;
-		HashMap<String,Integer> possibleReviewers = new HashMap<String, Integer>();
+		HashMap<String, Integer> possibleReviewers = new HashMap<String, Integer>();
 
 		double[] newInst = null;
 		newInst = new double[3];
@@ -66,13 +92,11 @@ public class NearestNeighborBidder extends Bidder {
 				String filename = instance.stringValue(0);
 				String reviewer = instance.classAttribute().value(
 						(int) instance.classValue());
-				System.out.println(filename
-						+ ", "
-						+ reviewer);
-				if(possibleReviewers.containsKey(reviewer)){
-					possibleReviewers.put(reviewer, possibleReviewers.get(reviewer) + 1);
-				}
-				else{
+				System.out.println(filename + ", " + reviewer);
+				if (possibleReviewers.containsKey(reviewer)) {
+					possibleReviewers.put(reviewer, possibleReviewers
+							.get(reviewer) + 1);
+				} else {
 					possibleReviewers.put(reviewer, 1);
 				}
 			}
@@ -80,13 +104,13 @@ public class NearestNeighborBidder extends Bidder {
 			e.printStackTrace();
 		}
 		int maxFound = 0;
-		for(String reviewer : possibleReviewers.keySet()){
+		for (String reviewer : possibleReviewers.keySet()) {
 			int count = possibleReviewers.get(reviewer);
-			if(count > maxFound){
+			if (count > maxFound) {
 				maxFound = count;
 				selectedReviewer = reviewer;
 			}
-			System.out.println(reviewer+"\t"+count);
+			System.out.println(reviewer + "\t" + count);
 		}
 		return selectedReviewer;
 	}

@@ -4,6 +4,8 @@ import applications.analyzer.DocumentClassifier;
 import applications.analyzer.DocumentClassifierType;
 
 public class BayesianBidder extends Bidder{
+	
+	private static final long serialVersionUID = -926572315735858206L;
 	private DocumentClassifier classifier;
 	
 	public void train(String pathToReviewers) {
