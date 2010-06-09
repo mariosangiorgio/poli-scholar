@@ -12,9 +12,9 @@ public class AutomaticBidding {
 		String pathToSubmissions = "automaticBidding/submissions";
 
 		String filename = "automaticBidding/savedBidder";
-		boolean load = true;
+		boolean load = false;
 		
-		BiddingMethods method = BiddingMethods.NaiveBayesian;
+		BiddingMethods method = BiddingMethods.VectorSpaceModel;
 		
 		// TODO: write a menu to select the bidder
 		
@@ -29,6 +29,7 @@ public class AutomaticBidding {
 				break;
 			case VectorSpaceModel:
 				bidder = new NearestNeighborBidder(5);
+				break;
 			default:
 				bidder = null;
 				break;
