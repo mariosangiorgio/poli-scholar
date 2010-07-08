@@ -53,6 +53,7 @@ public class ContentDownloader {
 		}
         
         if(response.getStatusLine().getStatusCode() != 200){
+        	request.abort();
         	throw new DownloadException(response.getStatusLine().getStatusCode());
         }
         
