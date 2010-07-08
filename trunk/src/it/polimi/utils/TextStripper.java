@@ -16,10 +16,13 @@ public class TextStripper {
 	private static final Pattern dash				 = Pattern.compile("\\-\\s*");
 	private static final Pattern multipleWhitespaces = Pattern.compile("\\s+");
 	
-	public static String getFullText(PDDocument fullTextDocument) throws IOException, PDFEncryptedException{
+	private String fullText;
+	
+	public TextStripper(){
+	}
+	
+	public String getFullText(PDDocument fullTextDocument) throws IOException, PDFEncryptedException{
 		if(!fullTextDocument.isEncrypted()){
-			String fullText;
-		
 			StringWriter writer = new StringWriter();
 			PDFTextStripper stripper = new PDFTextStripper();
 			stripper.setSuppressDuplicateOverlappingText(false);
@@ -44,7 +47,7 @@ public class TextStripper {
 			throw new PDFEncryptedException();
 	}
 	
-	public static String getFullText(File document) throws IOException, PDFEncryptedException{
+	public String getFullText(File document) throws IOException, PDFEncryptedException{
 		PDDocument fullTextDocument = PDDocument.load(document);
 		String fullText;
 		try{
@@ -58,16 +61,19 @@ public class TextStripper {
 		return fullText;		
 	}
 	
-	public static String getFullText(InputStream document) throws IOException, PDFEncryptedException{
+	public String getFullText(InputStream document) throws IOException, PDFEncryptedException{
 		PDDocument fullTextDocument = PDDocument.load(document);
 		String fullText = getFullText(fullTextDocument);
 		fullTextDocument.close();
 		return fullText;		
 	}
 	
-	public static String getAbstract(String fullText) throws AbstractNotFoundException{
-		// TODO Implement
+	public String getAbstract(String fullText) throws AbstractNotFoundException{
 		return "";
+	}
+	
+	public String getAbstract() throws AbstractNotFoundException{
+		return getAbstract(fullText);
 	}
 
 }
