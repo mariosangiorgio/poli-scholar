@@ -109,7 +109,7 @@ public class Article {
 	public String getFullText() {
 		ByteArrayInputStream stream = new ByteArrayInputStream(fullTextPdf);
 		try {
-			return TextStripper.getFullText(stream);
+			return (new TextStripper()).getFullText(stream);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
