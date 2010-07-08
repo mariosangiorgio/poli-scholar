@@ -64,5 +64,10 @@ public class TextStripper {
 		fullTextDocument.close();
 		return fullText;		
 	}
+	
+	public static String getAbstract(String fullText) throws AbstractNotFoundException{
+		// TODO Implement
+		return "";
+	}
 
 }
