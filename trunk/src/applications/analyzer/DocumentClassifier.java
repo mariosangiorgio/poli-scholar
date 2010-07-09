@@ -98,7 +98,7 @@ public abstract class DocumentClassifier implements Serializable{
 					File document = new File(pathToTrainingSet+"/"+labelName+"/"+documentName);
 					if(!documentName.startsWith(".") && document.isFile()){
 						try {
-							String fullText = (new TextStripper()).getFullText(document);
+							String fullText = (new TextStripper()).getContent(document);
 							instancelist.addThruPipe(new Instance(fullText, labelName, documentName, null));
 						} catch (Exception e) {
 							e.printStackTrace();

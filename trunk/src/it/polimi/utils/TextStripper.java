@@ -15,14 +15,33 @@ public class TextStripper {
 	private static final Pattern dash = Pattern.compile("\\-\\s*");
 	private static final Pattern multipleWhitespaces = Pattern.compile("\\s+");
 
-	private String fullText;
+	private boolean stripAbstract = false;
 
 	public TextStripper() {
 	}
 
-	public String getFullText(PDDocument fullTextDocument) throws IOException,
+	public TextStripper(boolean stripAbstract) {
+		this.stripAbstract = stripAbstract;
+	}
+
+	public String getContent(File document) throws AbstractNotFoundException,
+			IOException, PDFEncryptedException {
+		String fullText, documentAbstract;
+		fullText = getFullText(document);
+		if (stripAbstract) {
+			documentAbstract = getAbstract(fullText);
+			return documentAbstract;
+		}
+		else{
+			return fullText;
+		}
+	}
+
+	private String getFullText(PDDocument fullTextDocument) throws IOException,
 			PDFEncryptedException {
 		if (!fullTextDocument.isEncrypted()) {
+			String fullText;
+
 			StringWriter writer = new StringWriter();
 			PDFTextStripper stripper = new PDFTextStripper();
 			stripper.setSuppressDuplicateOverlappingText(false);
@@ -47,7 +66,7 @@ public class TextStripper {
 			throw new PDFEncryptedException();
 	}
 
-	public String getFullText(File document) throws IOException,
+	private String getFullText(File document) throws IOException,
 			PDFEncryptedException {
 		PDDocument fullTextDocument = PDDocument.load(document);
 		String fullText;
@@ -73,17 +92,14 @@ public class TextStripper {
 				Pattern.CASE_INSENSITIVE).matcher(fullText);
 		Matcher endOfAbstractMatcher = Pattern.compile("keywords",
 				Pattern.CASE_INSENSITIVE).matcher(fullText);
-		//TODO: Manage when the word 'abstract' is mentioned not as a section name but it the title
+		// TODO: Manage when the word 'abstract' is mentioned not as a section
+		// name but it the title
 		if (startOfAbstractMatcher.find() && endOfAbstractMatcher.find()) {
-			String paperAbstract = fullText.substring(startOfAbstractMatcher.end()+1,endOfAbstractMatcher.start()-1);
+			String paperAbstract = fullText.substring(startOfAbstractMatcher
+					.end() + 1, endOfAbstractMatcher.start() - 1);
 			return paperAbstract;
 		} else {
 			throw new AbstractNotFoundException();
 		}
 	}
-
-	public String getAbstract() throws AbstractNotFoundException {
-		return getAbstract(fullText);
-	}
-
 }
