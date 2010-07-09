@@ -26,15 +26,23 @@ public class TextStripper {
 
 	public String getContent(File document) throws AbstractNotFoundException,
 			IOException, PDFEncryptedException {
-		String fullText, documentAbstract;
-		fullText = getFullText(document);
+		String content;
+		content = getFullText(document);
 		if (stripAbstract) {
-			documentAbstract = getAbstract(fullText);
-			return documentAbstract;
+			content = getAbstract(content);
 		}
-		else{
-			return fullText;
-		}
+		Matcher matcher;
+		// Removing dashes to rebuild hyphenated words
+		matcher = dash.matcher(content);
+		content = matcher.replaceAll("");
+		// Dropping non alphabetic characters
+		matcher = nonAlphabetic.matcher(content);
+		content = matcher.replaceAll(" ");
+		// Merging multiple whitespaces
+		matcher = multipleWhitespaces.matcher(content);
+		content = matcher.replaceAll(" ");
+
+		return content;
 	}
 
 	private String getFullText(PDDocument fullTextDocument) throws IOException,
@@ -51,16 +59,6 @@ public class TextStripper {
 
 			fullText = writer.toString();
 
-			Matcher matcher;
-			// Removing dashes to rebuild hyphenated words
-			matcher = dash.matcher(fullText);
-			fullText = matcher.replaceAll("");
-			// Dropping non alphabetic characters
-			matcher = nonAlphabetic.matcher(fullText);
-			fullText = matcher.replaceAll(" ");
-			// Merging multiple whitespaces
-			matcher = multipleWhitespaces.matcher(fullText);
-			fullText = matcher.replaceAll(" ");
 			return fullText;
 		} else
 			throw new PDFEncryptedException();
@@ -88,18 +86,24 @@ public class TextStripper {
 	}
 
 	public String getAbstract(String fullText) throws AbstractNotFoundException {
-		Matcher startOfAbstractMatcher = Pattern.compile("abstract",
+		Matcher startOfAbstractMatcher = Pattern.compile("abstract[\\s\\-Ñ]*",
 				Pattern.CASE_INSENSITIVE).matcher(fullText);
-		Matcher endOfAbstractMatcher = Pattern.compile("keywords",
+		Matcher endOfAbstractMatcher = Pattern.compile(
+				"(keywords[\\s\\-Ñ]*)|(i?.?\\s*introduction[\\s\\-Ñ]*)",
 				Pattern.CASE_INSENSITIVE).matcher(fullText);
+
 		// TODO: Manage when the word 'abstract' is mentioned not as a section
 		// name but it the title
-		if (startOfAbstractMatcher.find() && endOfAbstractMatcher.find()) {
-			String paperAbstract = fullText.substring(startOfAbstractMatcher
-					.end() + 1, endOfAbstractMatcher.start() - 1);
-			return paperAbstract;
-		} else {
-			throw new AbstractNotFoundException();
+		if (startOfAbstractMatcher.find()) {
+			String paperAbstract;
+			if (endOfAbstractMatcher.find()) {
+				paperAbstract = fullText.substring(
+						startOfAbstractMatcher.end(), endOfAbstractMatcher
+								.start() - 1);
+				return paperAbstract;
+			}
+
 		}
+		throw new AbstractNotFoundException();
 	}
 }
