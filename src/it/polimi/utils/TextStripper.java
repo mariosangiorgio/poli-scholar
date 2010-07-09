@@ -34,7 +34,7 @@ public class TextStripper {
 		Matcher matcher;
 		// Removing dashes to rebuild hyphenated words
 		matcher = dash.matcher(content);
-		content = matcher.replaceAll("");
+		content = matcher.replaceAll(" ");
 		// Dropping non alphabetic characters
 		matcher = nonAlphabetic.matcher(content);
 		content = matcher.replaceAll(" ");
@@ -86,14 +86,18 @@ public class TextStripper {
 	}
 
 	public String getAbstract(String fullText) throws AbstractNotFoundException {
-		Matcher startOfAbstractMatcher = Pattern.compile("abstract[\\s\\-Ñ]*",
+		Matcher startOfAbstractMatcher = Pattern.compile("abstract\\s*[\\-Ñ:\n]\\s*",
 				Pattern.CASE_INSENSITIVE).matcher(fullText);
 		Matcher endOfAbstractMatcher = Pattern.compile(
-				"(keywords[\\s\\-Ñ]*)|(i?.?\\s*introduction[\\s\\-Ñ]*)",
+				"(keywords\\s*[\\-Ñ:\n]\\s*)|"+
+				"(i?.?\\s*introduction\\s*\n)|"+
+				"(index terms\\s*[\\-Ñ:\n]\\s*)",
 				Pattern.CASE_INSENSITIVE).matcher(fullText);
 
-		// TODO: Manage when the word 'abstract' is mentioned not as a section
-		// name but it the title
+		/*
+		 * TODO: Manage when the keywords are mentioned not as a section name
+		 * but it the title or in the body of the abstract
+		 */
 		if (startOfAbstractMatcher.find()) {
 			String paperAbstract;
 			if (endOfAbstractMatcher.find()) {
