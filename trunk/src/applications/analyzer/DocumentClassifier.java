@@ -2,9 +2,11 @@ package applications.analyzer;
 
 import it.polimi.utils.TextStripper;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -28,31 +30,36 @@ import cc.mallet.pipe.TokenSequenceRemoveStopwords;
 import cc.mallet.types.Instance;
 import cc.mallet.types.InstanceList;
 
-public abstract class DocumentClassifier implements Serializable{
+public abstract class DocumentClassifier implements Serializable {
 	private static final long serialVersionUID = 8990469542892217623L;
-	
+
 	private Classifier classifier;
 	private Collection<String> labels;
-	
+
+	private TextStripper textStripper;
+
 	private String pathToTrainingSet;
+
 	protected abstract ClassifierTrainer<?> getTrainer();
-	
-	protected DocumentClassifier(String pathToTrainingSet){
+
+	protected DocumentClassifier(String pathToTrainingSet) {
 		this.pathToTrainingSet = pathToTrainingSet;
 	}
-	
-	public String classify(String input){
+
+	public String classify(String input) {
 		Classification classification = classifier.classify(input);
 		return classification.getLabeling().getBestLabel().toString();
 	}
-	
-	private void train(){
+
+	private void train() {
 		InstanceList instances = loadTrainingInstances();
 		ClassifierTrainer<?> trainer = getTrainer();
 
-		// Splitting the instance list to have a training set and a validation set
-		double[] proportions = {0.75,0.25};
-		InstanceList[] instanceSets  = instances.split(new Random(), proportions);
+		// Splitting the instance list to have a training set and a validation
+		// set
+		double[] proportions = { 0.75, 0.25 };
+		InstanceList[] instanceSets = instances
+				.split(new Random(), proportions);
 
 		trainer.setValidationInstances(instanceSets[1]);
 		classifier = trainer.train(instanceSets[0]);
@@ -63,54 +70,86 @@ public abstract class DocumentClassifier implements Serializable{
 		System.out.println(instanceSets[0].targetLabelDistribution());
 		System.out.println(" Documents used for testing");
 		System.out.println(instanceSets[1].targetLabelDistribution());
-		
-		Trial trial = new Trial(classifier,instanceSets[1]);
+
+		Trial trial = new Trial(classifier, instanceSets[1]);
 		System.out.println(" Test statistics:");
-		System.out.println("Accuracy:\t"+trial.getAccuracy());
-		System.out.println("Average rank:\t"+trial.getAverageRank());
+		System.out.println("Accuracy:\t" + trial.getAccuracy());
+		System.out.println("Average rank:\t" + trial.getAverageRank());
 		System.out.println();
-		for(String label : labels){
-			System.out.println(label+"\tPrecision: "+trial.getPrecision(label)+"\tRecall: "+trial.getRecall(label)+"\tFscore: "+trial.getF1(label));
+		for (String label : labels) {
+			System.out.println(label + "\tPrecision: "
+					+ trial.getPrecision(label) + "\tRecall: "
+					+ trial.getRecall(label) + "\tFscore: "
+					+ trial.getF1(label));
 		}
 	}
-	
-	private InstanceList loadTrainingInstances(){
-		Pipe instancePipe = new SerialPipes (new Pipe[] {
-				new Target2Label (),				// Target String -> class label
-				new Input2CharSequence (),			// Data File -> String containing contents
-				new CharSequence2TokenSequence (),	// Data String -> TokenSequence
-				new TokenSequenceLowercase (),		// TokenSequence words lower-cased
-				new TokenSequenceRemoveStopwords (),// Remove stop-words from sequence
-				new Stemmer(),
-				new TokenSequence2FeatureSequence(),// Replace each Token with a feature index
-				new FeatureSequence2FeatureVector() // Collapse word order into a "feature vector"
-			});
-		InstanceList instancelist = new InstanceList (instancePipe);
-		
+
+	private InstanceList loadTrainingInstances() {
+		Pipe instancePipe = new SerialPipes(new Pipe[] { new Target2Label(), // Target
+				// String
+				// ->
+				// class
+				// label
+				new Input2CharSequence(), // Data File -> String containing
+				// contents
+				new CharSequence2TokenSequence(), // Data String ->
+				// TokenSequence
+				new TokenSequenceLowercase(), // TokenSequence words lower-cased
+				new TokenSequenceRemoveStopwords(),// Remove stop-words from
+				// sequence
+				new Stemmer(), new TokenSequence2FeatureSequence(),
+				// Replace each Token with a feature index
+				new FeatureSequence2FeatureVector() // Collapse word order into
+				// a "feature vector"
+				});
+		InstanceList instancelist = new InstanceList(instancePipe);
+
 		// Reading the documents and labeling them with their directory name
 		File trainingSetRoot = new File(pathToTrainingSet);
 		labels = new Vector<String>();
-		for(String labelName:trainingSetRoot.list()){
-			File label = new File(pathToTrainingSet+"/"+labelName);
-			if(label.isDirectory() && !labelName.startsWith(".")){
+		for (String labelName : trainingSetRoot.list()) {
+			File label = new File(pathToTrainingSet + "/" + labelName);
+			if (label.isDirectory() && !labelName.startsWith(".")) {
 				labels.add(labelName);
-				for(String documentName:label.list()){
-					File document = new File(pathToTrainingSet+"/"+labelName+"/"+documentName);
-					if(!documentName.startsWith(".") && document.isFile()){
-						try {
-							String fullText = (new TextStripper()).getContent(document);
-							instancelist.addThruPipe(new Instance(fullText, labelName, documentName, null));
-						} catch (Exception e) {
-							e.printStackTrace();
+				for (String documentName : label.list()) {
+					File document = new File(pathToTrainingSet + "/"
+							+ labelName + "/" + documentName);
+					if (!documentName.startsWith(".") && document.isFile()) {
+						String content = null;
+						if (documentName.endsWith(".pdf")) {
+							try {
+								content = textStripper.getContent(document);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
 						}
+						if (documentName.endsWith(".txt")) {
+							try {
+								FileReader fileReader = new FileReader(document);
+								BufferedReader reader = new BufferedReader(
+										fileReader);
+								StringBuffer buffer = new StringBuffer();
+								String temp;
+								while ((temp = reader.readLine()) != null) {
+									buffer.append(temp);
+									buffer.append(" ");
+								}
+								content = buffer.toString();
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+						instancelist.addThruPipe(new Instance(content,
+								labelName, documentName, null));
 					}
 				}
 			}
 		}
 		return instancelist;
 	}
-		
-	public static DocumentClassifier getFromTrainingSet(DocumentClassifierType type, String pathToTrainingSet) {
+
+	public static DocumentClassifier getFromTrainingSet(
+			DocumentClassifierType type, String pathToTrainingSet) {
 		DocumentClassifier classifier = null;
 		switch (type) {
 		case NaiveBayesian:
@@ -120,10 +159,11 @@ public abstract class DocumentClassifier implements Serializable{
 		classifier.train();
 		return classifier;
 	}
-	
+
 	public void save(String classifierFile) {
 		try {
-			FileOutputStream serializedFile = new FileOutputStream(classifierFile);
+			FileOutputStream serializedFile = new FileOutputStream(
+					classifierFile);
 			ObjectOutputStream outputStream;
 			outputStream = new ObjectOutputStream(serializedFile);
 			outputStream.writeObject(this);
@@ -133,12 +173,13 @@ public abstract class DocumentClassifier implements Serializable{
 			e.printStackTrace();
 		}
 	}
-	
-	public static DocumentClassifier load(String classifierFile){
+
+	public static DocumentClassifier load(String classifierFile) {
 		DocumentClassifier classifier = null;
 		try {
 			FileInputStream inputStream = new FileInputStream(classifierFile);
-			ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
+			ObjectInputStream objectInputStream = new ObjectInputStream(
+					inputStream);
 			classifier = (DocumentClassifier) objectInputStream.readObject();
 			objectInputStream.close();
 			inputStream.close();
