@@ -34,7 +34,7 @@ public class TextStripper {
 		Matcher matcher;
 		// Removing dashes to rebuild hyphenated words
 		matcher = dash.matcher(content);
-		content = matcher.replaceAll(" ");
+		content = matcher.replaceAll("");
 		// Dropping non alphabetic characters
 		matcher = nonAlphabetic.matcher(content);
 		content = matcher.replaceAll(" ");
@@ -86,12 +86,12 @@ public class TextStripper {
 	}
 
 	public String getAbstract(String fullText) throws AbstractNotFoundException {
-		Matcher startOfAbstractMatcher = Pattern.compile("abstract\\s*[\\-б:\n]\\s*",
+		Matcher startOfAbstractMatcher = Pattern.compile("abstract\\s*[\\-ба:\n]\\s*",
 				Pattern.CASE_INSENSITIVE).matcher(fullText);
 		Matcher endOfAbstractMatcher = Pattern.compile(
-				"(keywords\\s*[\\-б:\n]\\s*)|"+
+				"(keywords\\s*[\\-ба:\n]\\s*)|"+
 				"(i?.?\\s*introduction\\s*\n)|"+
-				"(index terms\\s*[\\-б:\n]\\s*)",
+				"(index terms\\s*[\\-ба:\n]\\s*)",
 				Pattern.CASE_INSENSITIVE).matcher(fullText);
 
 		/*
