@@ -86,12 +86,12 @@ public class TextStripper {
 	}
 
 	public String getAbstract(String fullText) throws AbstractNotFoundException {
-		Matcher startOfAbstractMatcher = Pattern.compile("abstract\\s*[\\-研:\n]\\s*",
+		Matcher startOfAbstractMatcher = Pattern.compile("abstract\\s*[\\.\\-研:\n]?\\s*",
 				Pattern.CASE_INSENSITIVE).matcher(fullText);
 		Matcher endOfAbstractMatcher = Pattern.compile(
-				"(keywords\\s*[\\-研:\n]\\s*)|"+
+				"(keywords\\s*[\\-研:\n]?\\s*)|"+
 				"(i?.?\\s*introduction\\s*\n)|"+
-				"(index terms\\s*[\\-研:\n]\\s*)",
+				"(index terms\\s*[\\-研:\n]?\\s*)",
 				Pattern.CASE_INSENSITIVE).matcher(fullText);
 
 		/*
@@ -101,10 +101,14 @@ public class TextStripper {
 		if (startOfAbstractMatcher.find()) {
 			String paperAbstract;
 			if (endOfAbstractMatcher.find()) {
+				try{
 				paperAbstract = fullText.substring(
 						startOfAbstractMatcher.end(), endOfAbstractMatcher
 								.start() - 1);
 				return paperAbstract;
+				}
+				catch(RuntimeException e){
+				}
 			}
 
 		}
