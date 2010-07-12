@@ -30,9 +30,17 @@ public class TwoPhaseClassifier {
 		}
 		// Classification of each submission
 		Collection<File> documents = getDirectoryContent("plaintext/automaticBidding/submissions");
+		Submissions submissions = new Submissions();
 		for (File document : documents) {
 			String documentContent = getFileContent(document);
-			System.out.println(document.getName()+"\t"+classifier.classify(documentContent));
+			String category = classifier.classify(documentContent);
+			submissions.addSubmissionToClass(category, document.getName());
+		}
+		for(String category : submissions.getCategories()){
+			System.out.println(category);
+			for(String document : submissions.getPapersOfCategory(category)){
+				System.out.println("\t"+document);
+			}
 		}
 
 		// Classification of each reviewer
