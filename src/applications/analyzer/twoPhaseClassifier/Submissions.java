@@ -6,11 +6,7 @@ import java.util.Set;
 import java.util.Vector;
 
 public class Submissions {
-	private HashMap<String,Collection<String>> submissions;
-	
-	public Submissions(){
-		submissions = new HashMap<String, Collection<String>>();
-	}
+	private HashMap<String,Collection<String>> submissions = new HashMap<String, Collection<String>>();
 	
 	public void addSubmissionToClass(String className,String submissionName){
 		Collection<String> submissionList;
