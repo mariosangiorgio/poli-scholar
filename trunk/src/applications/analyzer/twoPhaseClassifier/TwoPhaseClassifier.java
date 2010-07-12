@@ -28,6 +28,7 @@ public class TwoPhaseClassifier {
 		} else {
 			classifier = BayesianDocumentClassifier.load(classifierFile);
 		}
+		
 		// Classification of each submission
 		Collection<File> documents = getDirectoryContent("plaintext/automaticBidding/submissions");
 		Submissions submissions = new Submissions();
@@ -42,8 +43,24 @@ public class TwoPhaseClassifier {
 				System.out.println("\t"+document);
 			}
 		}
-
-		// Classification of each reviewer
+		
+		//Getting the reviewers
+		Collection<File> reviewers = getSubDirectories("plaintext/automaticBidding/reviewers");
+		for(File reviewerDirectory : reviewers){
+			// Classification of each reviewer
+			Reviewer reviewer = new Reviewer(reviewerDirectory.getName());
+			Collection<File> papers = getDirectoryContent(reviewerDirectory);
+			for(File paper : papers){
+				String paperContent = getFileContent(paper);
+				String category = classifier.classify(paperContent);
+				reviewer.addArticleCategory(category);
+			}
+			System.out.println(reviewer.getName());
+			for(Category category : reviewer.getTopCategories(2)){
+				System.out.println("\t"+category.getName()+"\t"+category.getCount());
+			}
+		}
+		
 	}
 
 	public static String getFileContent(File file) throws FileNotFoundException{
@@ -67,6 +84,7 @@ public class TwoPhaseClassifier {
 		File file = new File(rootDirectory);
 		return getDirectoryContent(file);
 	}
+	
 	public static Collection<File> getDirectoryContent(File rootDirectory)
 			throws NotADirectoryException {
 		Collection<File> files = new Vector<File>();
@@ -75,6 +93,25 @@ public class TwoPhaseClassifier {
 		}
 		for (File file : rootDirectory.listFiles()) {
 			if (file.isFile() && !file.isHidden()) {
+				files.add(file);
+			}
+		}
+		return files;
+	}
+	
+	public static Collection<File> getSubDirectories(String rootDirectory) throws NotADirectoryException{
+		File file = new File(rootDirectory);
+		return getSubDirectories(file);
+	}
+	
+	public static Collection<File> getSubDirectories(File rootDirectory)
+			throws NotADirectoryException {
+		Collection<File> files = new Vector<File>();
+		if (!rootDirectory.isDirectory()) {
+			throw new NotADirectoryException();
+		}
+		for (File file : rootDirectory.listFiles()) {
+			if (file.isDirectory() && !file.isHidden()) {
 				files.add(file);
 			}
 		}

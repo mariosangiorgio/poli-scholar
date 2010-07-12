@@ -86,16 +86,13 @@ public abstract class DocumentClassifier implements Serializable {
 
 	private InstanceList loadTrainingInstances() {
 		Pipe instancePipe = new SerialPipes(new Pipe[] { new Target2Label(), // Target
-				// String
-				// ->
-				// class
-				// label
+				// String -> class label
 				new Input2CharSequence(), // Data File -> String containing
 				// contents
 				new CharSequence2TokenSequence(), // Data String ->
 				// TokenSequence
 				new TokenSequenceLowercase(), // TokenSequence words lower-cased
-				new TokenSequenceRemoveStopwords(),// Remove stop-words from
+				(new TokenSequenceRemoveStopwords()).addStopWords(new File("resources/computer science.stoplist")),// Remove stop-words from
 				// sequence
 				new Stemmer(), new TokenSequence2FeatureSequence(),
 				// Replace each Token with a feature index
