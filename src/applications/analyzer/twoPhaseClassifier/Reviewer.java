@@ -11,6 +11,7 @@ import java.util.Vector;
 public class Reviewer {
 	private String name;
 	private HashMap<String, Integer> classCount;
+	private int totalPapers;
 
 	public Reviewer(String name) {
 		this.name = name;
@@ -24,13 +25,14 @@ public class Reviewer {
 			value++;
 		}
 		classCount.put(cateogry, value);
+		totalPapers++;
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public Collection<Category> getTopCategories(int numberOfEntries) {
+	public Collection<Category> getTopCategories(float coverage) {
 		List<Category> categories = new ArrayList<Category>();
 		for (String category : classCount.keySet()) {
 			categories.add(new Category(category, classCount.get(category)));
@@ -38,10 +40,14 @@ public class Reviewer {
 		Collections.sort(categories, new CategoryComparator());
 
 		Collection<Category> result = new Vector<Category>();
-		if (numberOfEntries < categories.size()) {
-			result.addAll(categories.subList(0, numberOfEntries));
-		} else {
-			result.addAll(categories);
+
+		int i = 0;
+		float covered = 0;
+		while(i < categories.size() && covered < coverage){
+			Category category = categories.get(i);
+			result.add(category);
+			covered += ((float) category.getCount())/totalPapers;
+			i++;
 		}
 		return result;
 	}
