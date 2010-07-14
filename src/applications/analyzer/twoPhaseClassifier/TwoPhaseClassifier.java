@@ -13,24 +13,44 @@ import applications.analyzer.DocumentClassifier;
 import applications.analyzer.DocumentClassifierType;
 
 public class TwoPhaseClassifier {
-
+	
 	public static void main(String[] args) throws Exception {
-		// Getting the classifier from the clustered data-set
-		DocumentClassifier classifier;
+		TwoPhaseClassifier twoPhaseClassifier = null;
+		
 		String classifierFile = "twoPhaseClassifier";
 		boolean train = false;
 		File file = new File(classifierFile);
 
 		if (train || !file.exists()) {
-			classifier = BayesianDocumentClassifier.getFromTrainingSet(
-					DocumentClassifierType.NaiveBayesian, "plaintext/model");
-			classifier.save(classifierFile);
+			twoPhaseClassifier = TwoPhaseClassifier.train("plaintext/model",classifierFile);
 		} else {
-			classifier = BayesianDocumentClassifier.load(classifierFile);
+			twoPhaseClassifier = TwoPhaseClassifier.load(classifierFile);
 		}
 		
-		// Classification of each submission
-		Collection<File> documents = getDirectoryContent("plaintext/automaticBidding/submissions");
+		twoPhaseClassifier.classifySubmissions("plaintext/automaticBidding/submissions");
+		twoPhaseClassifier.classifyReviewers("plaintext/automaticBidding/reviewers",2);		
+	}
+	
+	
+	private DocumentClassifier classifier;
+	
+	public static TwoPhaseClassifier train(String dataSource, String classifierFile){
+		TwoPhaseClassifier twoPhaseClassifier = new TwoPhaseClassifier();
+		
+		twoPhaseClassifier.classifier = BayesianDocumentClassifier.getFromTrainingSet(
+				DocumentClassifierType.NaiveBayesian, dataSource);
+		twoPhaseClassifier.classifier.save(classifierFile);
+		return twoPhaseClassifier;
+	}
+	
+	private static TwoPhaseClassifier load(String classifierFile) {
+		TwoPhaseClassifier twoPhaseClassifier = new TwoPhaseClassifier();
+		twoPhaseClassifier.classifier = BayesianDocumentClassifier.load(classifierFile);
+		return twoPhaseClassifier;
+	}
+	
+	public void classifySubmissions(String path) throws NotADirectoryException, FileNotFoundException{
+		Collection<File> documents = getDirectoryContent(path);
 		Submissions submissions = new Submissions();
 		for (File document : documents) {
 			String documentContent = getFileContent(document);
@@ -43,9 +63,10 @@ public class TwoPhaseClassifier {
 				System.out.println("\t"+document);
 			}
 		}
-		
-		//Getting the reviewers
-		Collection<File> reviewers = getSubDirectories("plaintext/automaticBidding/reviewers");
+	}
+	
+	public void classifyReviewers(String path,int numberOfCategories) throws NotADirectoryException, FileNotFoundException{
+		Collection<File> reviewers = getSubDirectories(path);
 		for(File reviewerDirectory : reviewers){
 			// Classification of each reviewer
 			Reviewer reviewer = new Reviewer(reviewerDirectory.getName());
@@ -56,14 +77,13 @@ public class TwoPhaseClassifier {
 				reviewer.addArticleCategory(category);
 			}
 			System.out.println(reviewer.getName());
-			for(Category category : reviewer.getTopCategories(2)){
+			for(Category category : reviewer.getTopCategories(numberOfCategories)){
 				System.out.println("\t"+category.getName()+"\t"+category.getCount());
 			}
 		}
-		
 	}
-
-	public static String getFileContent(File file) throws FileNotFoundException{
+	
+	public String getFileContent(File file) throws FileNotFoundException{
 		FileReader fileReader = new FileReader(file);
 		BufferedReader reader = new BufferedReader(
 				fileReader);
@@ -80,12 +100,12 @@ public class TwoPhaseClassifier {
 		return buffer.toString();
 	}
 	
-	public static Collection<File> getDirectoryContent(String rootDirectory) throws NotADirectoryException{
+	public Collection<File> getDirectoryContent(String rootDirectory) throws NotADirectoryException{
 		File file = new File(rootDirectory);
 		return getDirectoryContent(file);
 	}
 	
-	public static Collection<File> getDirectoryContent(File rootDirectory)
+	public Collection<File> getDirectoryContent(File rootDirectory)
 			throws NotADirectoryException {
 		Collection<File> files = new Vector<File>();
 		if (!rootDirectory.isDirectory()) {
@@ -99,12 +119,12 @@ public class TwoPhaseClassifier {
 		return files;
 	}
 	
-	public static Collection<File> getSubDirectories(String rootDirectory) throws NotADirectoryException{
+	public Collection<File> getSubDirectories(String rootDirectory) throws NotADirectoryException{
 		File file = new File(rootDirectory);
 		return getSubDirectories(file);
 	}
 	
-	public static Collection<File> getSubDirectories(File rootDirectory)
+	public Collection<File> getSubDirectories(File rootDirectory)
 			throws NotADirectoryException {
 		Collection<File> files = new Vector<File>();
 		if (!rootDirectory.isDirectory()) {
