@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Vector;
@@ -13,6 +14,7 @@ import applications.analyzer.DocumentClassifier;
 import applications.analyzer.DocumentClassifierType;
 
 public class TwoPhaseClassifier {
+	private Submissions submissions;
 
 	public static void main(String[] args) throws Exception {
 		TwoPhaseClassifier twoPhaseClassifier = null;
@@ -31,7 +33,7 @@ public class TwoPhaseClassifier {
 		twoPhaseClassifier
 				.classifySubmissions("plaintext/automaticBidding/submissions");
 		twoPhaseClassifier.classifyReviewers(
-				"plaintext/automaticBidding/reviewers", .6f);
+				"plaintext/automaticBidding/reviewers", .85f);
 	}
 
 	private DocumentClassifier classifier;
@@ -57,7 +59,7 @@ public class TwoPhaseClassifier {
 	public void classifySubmissions(String path) throws NotADirectoryException,
 			FileNotFoundException {
 		Collection<File> documents = getDirectoryContent(path);
-		Submissions submissions = new Submissions();
+		submissions = new Submissions();
 		for (File document : documents) {
 			String documentContent = getFileContent(document);
 			String category = classifier.classify(documentContent);
@@ -73,6 +75,12 @@ public class TwoPhaseClassifier {
 
 	public void classifyReviewers(String path, float coverage)
 			throws NotADirectoryException, FileNotFoundException {
+		FileWriter outputFile = null;
+		try {
+			outputFile = new FileWriter("proposedBids");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		Collection<File> reviewers = getSubDirectories(path);
 		for (File reviewerDirectory : reviewers) {
 			// Classification of each reviewer
@@ -83,12 +91,28 @@ public class TwoPhaseClassifier {
 				String category = classifier.classify(paperContent);
 				reviewer.addArticleCategory(category);
 			}
-			System.out.println(reviewer.getName());
-			
-			for (Category category : reviewer.getTopCategories(coverage)) {
-				System.out.println(category.getName() + "\t"
-						+ category.getCount());
+
+			try {
+				outputFile.write(reviewer.getName() + "\t");
+				System.out.println(reviewer.getName());
+
+				for (Category category : reviewer.getTopCategories(coverage)) {
+					System.out.println("\t" + category.getName() + "\t"
+							+ category.getCount());
+					for (Integer paperNumber : submissions
+							.getSubmissionsOfCategory(category.getName())) {
+						outputFile.write(paperNumber + "\t");
+					}
+				}
+				outputFile.write("\n");
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
+		}
+		try {
+			outputFile.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 

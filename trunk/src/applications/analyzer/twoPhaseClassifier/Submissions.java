@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Submissions {
 	private HashMap<String,Collection<String>> submissions = new HashMap<String, Collection<String>>();
@@ -28,5 +30,21 @@ public class Submissions {
 		Collection<String> submissionList = new Vector<String>();
 		submissionList.addAll(submissions.get(category));
 		return submissionList;
+	}
+
+	public Collection<Integer> getSubmissionsOfCategory(String categoryName) {
+		Pattern icsmFilename = Pattern.compile("icsm2010_submission_(\\d*)");
+		Vector<Integer> result = new Vector<Integer>();
+		Collection<String> categoryPaper = submissions.get(categoryName);
+		if(categoryPaper == null){
+			return result;
+		}
+		for(String paper : categoryPaper){
+			Matcher numberMatcher = icsmFilename.matcher(paper);
+			if(numberMatcher.find()){
+				result.add(Integer.parseInt(numberMatcher.group(1)));
+			}
+		}
+		return result;
 	}
 }
