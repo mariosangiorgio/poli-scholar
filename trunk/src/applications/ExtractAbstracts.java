@@ -39,9 +39,12 @@ public class ExtractAbstracts {
 
 			String paperAbstract;
 			try {
-				paperAbstract = stripper.getContent(file);
 				String outputFilename = "plaintext/" + root + "/"
 						+ filename.replace(".pdf", ".txt");
+				if(new File(outputFilename).exists()){
+					continue;
+				}
+				paperAbstract = stripper.getContent(file);
 				FileWriter extrectedAbstract = new FileWriter(outputFilename);
 				extrectedAbstract.write(paperAbstract);
 				extrectedAbstract.close();
