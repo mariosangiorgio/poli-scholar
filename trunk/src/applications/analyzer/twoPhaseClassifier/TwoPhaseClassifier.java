@@ -33,7 +33,7 @@ public class TwoPhaseClassifier {
 		twoPhaseClassifier
 				.classifySubmissions("plaintext/automaticBidding/submissions");
 		twoPhaseClassifier.classifyReviewers(
-				"plaintext/automaticBidding/reviewers", .85f);
+				"plaintext/automaticBidding/reviewers", .75f);
 	}
 
 	private DocumentClassifier classifier;

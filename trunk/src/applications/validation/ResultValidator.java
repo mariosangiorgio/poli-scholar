@@ -61,10 +61,21 @@ public class ResultValidator {
 			}
 		}
 
+		CSVWriter.addNewLine("Reviewer,"+
+							 "Suggested Papers,"+
+							 "Actually Bid Papers,"+
+							 "Yes Retrieved,"+
+							 "Yes Actual,"+
+							 "Maybe Retrieved,"+
+							 "Maybe Actual,"+
+							 "Conflict Retrieved,"+
+							 "Conflict Actual");
 		for (Reviewer reviewer : reviewers.values()) {
 			System.out.println(reviewer.getName());
 			reviewer.printSummary();
+			System.out.println();
 		}
+		CSVWriter.close();
 	}
 
 }

@@ -78,7 +78,15 @@ public class Reviewer {
 		System.out.println("Retrieved "+conflictRetrieved+" out of "+conflict.size()+" conflict bids");
 		System.out.println("Precision: "+(float)relevantAndRetrieved/suggestedPapers.size());
 		System.out.println("Recall: "+(float)relevantAndRetrieved/(yes.size()+maybe.size()+conflict.size()));
-		System.out.println();
+		CSVWriter.addNewLine(name+","+
+							 suggestedPapers.size()+","+
+							 (yes.size()+maybe.size()+conflict.size())+","+
+							 yesRetrieved+","+
+							 yes.size()+","+
+							 maybeRetrieved+","+
+							 maybe.size()+","+
+							 conflictRetrieved+","+
+							 conflict.size());
 	}
 
 }
