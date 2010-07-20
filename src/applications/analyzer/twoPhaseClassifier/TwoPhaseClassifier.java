@@ -32,8 +32,17 @@ public class TwoPhaseClassifier {
 
 		twoPhaseClassifier
 				.classifySubmissions("plaintext/automaticBidding/submissions");
+		int minimumNumberOfPapers = 20;
+		int maximumNumberOfPapers = (int) Math.floor(.5d * twoPhaseClassifier
+				.getTotalSubmissions());
+		float topicCoverage = .75f;
 		twoPhaseClassifier.classifyReviewers(
-				"plaintext/automaticBidding/reviewers", .75f);
+				"plaintext/automaticBidding/reviewers", topicCoverage,
+				minimumNumberOfPapers, maximumNumberOfPapers);
+	}
+
+	private int getTotalSubmissions() {
+		return submissions.getTotalSubmissions();
 	}
 
 	private DocumentClassifier classifier;
@@ -73,7 +82,8 @@ public class TwoPhaseClassifier {
 		}
 	}
 
-	public void classifyReviewers(String path, float coverage)
+	public void classifyReviewers(String path, float maximumCoverage,
+			int minimumNumberOfSuggestion, int maximumNumberOfSuggestions)
 			throws NotADirectoryException, FileNotFoundException {
 		FileWriter outputFile = null;
 		try {
@@ -96,7 +106,25 @@ public class TwoPhaseClassifier {
 				outputFile.write(reviewer.getName() + "\t");
 				System.out.println(reviewer.getName());
 
-				for (Category category : reviewer.getTopCategories(coverage)) {
+				Vector<Category> selectedCategories = new Vector<Category>();
+				int totalReviewerPapers = reviewer.getTotalPapers();
+				int pickedPapers = 0;
+				float coverage = 0;
+				for (Category category : reviewer.getSortedCategories()) {
+					if (pickedPapers < minimumNumberOfSuggestion
+							|| (pickedPapers < maximumNumberOfSuggestions && coverage < maximumCoverage)) {
+						selectedCategories.add(category);
+						pickedPapers += submissions.getSubmissionsCount(category.getName());
+						coverage += (float) category.getCount()/totalReviewerPapers;
+					} else {
+						break;
+					}
+				}
+				if(pickedPapers > maximumNumberOfSuggestions){
+					selectedCategories.remove(selectedCategories.size()-1);
+				}
+
+				for (Category category : selectedCategories) {
 					System.out.println("\t" + category.getName() + "\t"
 							+ category.getCount());
 					for (Integer paperNumber : submissions
