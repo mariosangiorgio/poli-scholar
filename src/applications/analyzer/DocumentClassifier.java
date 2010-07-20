@@ -10,6 +10,8 @@ import java.io.FileReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Random;
 import java.util.Vector;
@@ -85,6 +87,14 @@ public abstract class DocumentClassifier implements Serializable {
 	}
 
 	private InstanceList loadTrainingInstances() {
+		// Getting the stopword resource
+		URI stopwordResource = null;
+		try {
+			stopwordResource = getClass().getResource("/resources/computer science.stoplist").toURI();
+		} catch (URISyntaxException e1) {
+			e1.printStackTrace();
+		}
+
 		Pipe instancePipe = new SerialPipes(new Pipe[] { new Target2Label(), // Target
 				// String -> class label
 				new Input2CharSequence(), // Data File -> String containing
@@ -92,7 +102,7 @@ public abstract class DocumentClassifier implements Serializable {
 				new CharSequence2TokenSequence(), // Data String ->
 				// TokenSequence
 				new TokenSequenceLowercase(), // TokenSequence words lower-cased
-				(new TokenSequenceRemoveStopwords()).addStopWords(new File("resources/computer science.stoplist")),// Remove stop-words from
+				(new TokenSequenceRemoveStopwords()).addStopWords(new File(stopwordResource)),// Remove stop-words from
 				// sequence
 				new Stemmer(), new TokenSequence2FeatureSequence(),
 				// Replace each Token with a feature index
