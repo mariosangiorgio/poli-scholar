@@ -32,7 +32,7 @@ public class Reviewer {
 		return name;
 	}
 
-	public Collection<Category> getTopCategories(float coverage) {
+	public Collection<Category> getSortedCategories() {
 		List<Category> categories = new ArrayList<Category>();
 		for (String category : classCount.keySet()) {
 			categories.add(new Category(category, classCount.get(category)));
@@ -40,16 +40,12 @@ public class Reviewer {
 		Collections.sort(categories, new CategoryComparator());
 
 		Collection<Category> result = new Vector<Category>();
-
-		int i = 0;
-		float covered = 0;
-		while(i < categories.size() && covered < coverage){
-			Category category = categories.get(i);
-			result.add(category);
-			covered += ((float) category.getCount())/totalPapers;
-			i++;
-		}
+		result.addAll(categories);
 		return result;
+	}
+	
+	public int getTotalPapers(){
+		return totalPapers;
 	}
 }
 
