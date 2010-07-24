@@ -62,7 +62,11 @@ public class DocumentLoader extends TextDirectoryLoader {
 					
 					System.out.println(txt);
 					
-					newInst[0] = (double) data.attribute(0).addStringValue((new TextStripper()).getContent(txt));
+					TextStripper textStripper = new TextStripper();
+					String content = textStripper.getContent(txt);
+					content = textStripper.cleanContent(content);
+					
+					newInst[0] = (double) data.attribute(0).addStringValue(content);
 					if (m_OutputFilename)
 						newInst[1] = (double) data.attribute(1).addStringValue(
 								subdirPath + File.separator + files[j]);

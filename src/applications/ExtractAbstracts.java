@@ -13,7 +13,7 @@ public class ExtractAbstracts {
 	
 	public static void main(String[] args) throws IOException,
 			PDFEncryptedException {
-		String root = "automaticBidding/reviewers/";
+		String root = "automaticBidding/submissions/";
 		new ExtractAbstracts().convert(root);
 	}
 
@@ -26,8 +26,6 @@ public class ExtractAbstracts {
 		}
 
 		for (String filename : sourceFolder.list()) {
-			//System.out.println(filename);
-
 			if (filename.startsWith(".")) {
 				continue;
 			}

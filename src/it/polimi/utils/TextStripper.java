@@ -32,16 +32,21 @@ public class TextStripper {
 			content = getAbstract(content);
 		}
 		Matcher matcher;
-		// Removing dashes to rebuild hyphenated words
-		matcher = dash.matcher(content);
-		content = matcher.replaceAll("");
-		// Dropping non alphabetic characters
-		matcher = nonAlphabetic.matcher(content);
-		content = matcher.replaceAll(" ");
 		// Merging multiple whitespaces
 		matcher = multipleWhitespaces.matcher(content);
 		content = matcher.replaceAll(" ");
+		// Removing dashes to rebuild hyphenated words
+		matcher = dash.matcher(content);
+		content = matcher.replaceAll("");
 
+		return content;
+	}
+
+	public String cleanContent(String content) {
+		Matcher matcher;
+		// Dropping non alphabetic characters
+		matcher = nonAlphabetic.matcher(content);
+		content = matcher.replaceAll(" ");
 		return content;
 	}
 
@@ -86,12 +91,13 @@ public class TextStripper {
 	}
 
 	public String getAbstract(String fullText) throws AbstractNotFoundException {
-		Matcher startOfAbstractMatcher = Pattern.compile("abstract\\s*[\\.\\-研:\n]?\\s*",
-				Pattern.CASE_INSENSITIVE).matcher(fullText);
+		Matcher startOfAbstractMatcher = Pattern.compile(
+				"abstract\\s*[\\.\\-研:\n]?\\s*", Pattern.CASE_INSENSITIVE)
+				.matcher(fullText);
 		Matcher endOfAbstractMatcher = Pattern.compile(
-				"(keywords\\s*[\\-研:\n]?\\s*)|"+
-				"(i?.?\\s*introduction\\s*\n)|"+
-				"(index terms\\s*[\\-研:\n]?\\s*)",
+				"(keywords\\s*[\\-研:\n]?\\s*)|"
+						+ "(i?.?\\s*introduction\\s*\n)|"
+						+ "(index terms\\s*[\\-研:\n]?\\s*)",
 				Pattern.CASE_INSENSITIVE).matcher(fullText);
 
 		/*
@@ -101,13 +107,11 @@ public class TextStripper {
 		if (startOfAbstractMatcher.find()) {
 			String paperAbstract;
 			if (endOfAbstractMatcher.find()) {
-				try{
-				paperAbstract = fullText.substring(
-						startOfAbstractMatcher.end(), endOfAbstractMatcher
-								.start() - 1);
-				return paperAbstract;
-				}
-				catch(RuntimeException e){
+				try {
+					paperAbstract = fullText.substring(startOfAbstractMatcher
+							.end(), endOfAbstractMatcher.start() - 1);
+					return paperAbstract;
+				} catch (RuntimeException e) {
 				}
 			}
 

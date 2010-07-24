@@ -42,7 +42,7 @@ public class Classifier {
 
 		if (train || !file.exists()) {
 			classifier = BayesianDocumentClassifier
-					.getFromTrainingSet(DocumentClassifierType.NaiveBayesian,"resources/TrainingSet");
+					.getFromTrainingSet(DocumentClassifierType.NaiveBayesian,"plaintext/model");
 			classifier.save(classifierFile);
 		} else {
 			classifier = BayesianDocumentClassifier.load(classifierFile);
@@ -52,7 +52,7 @@ public class Classifier {
 		session.beginTransaction();
 
 		// Parameters
-		int firstYear = 1992;
+		int firstYear = 1970;
 		int lastYear =  2009;
 		String journalName = "IEEE Transactions on Software Engineering";
 
@@ -69,7 +69,7 @@ public class Classifier {
 		
 		while (result.hasNext()) {
 			Article article = (Article) result.next();
-			String label = classifier.classify(article.getFullText());
+			String label = classifier.classify(article.getArticleAbstract());
 
 			System.out.println(article.getTitle());
 			//System.out.println(article.getArticleAbstract());

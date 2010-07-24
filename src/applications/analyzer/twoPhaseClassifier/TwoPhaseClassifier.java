@@ -19,7 +19,7 @@ public class TwoPhaseClassifier {
 	public static void main(String[] args) throws Exception {
 		TwoPhaseClassifier twoPhaseClassifier = null;
 
-		String classifierFile = "twoPhaseClassifier";
+		String classifierFile = "classifier";
 		boolean train = false;
 		File file = new File(classifierFile);
 
@@ -114,15 +114,22 @@ public class TwoPhaseClassifier {
 					if (pickedPapers < minimumNumberOfSuggestion
 							|| (pickedPapers < maximumNumberOfSuggestions && coverage < maximumCoverage)) {
 						selectedCategories.add(category);
-						pickedPapers += submissions.getSubmissionsCount(category.getName());
-						coverage += (float) category.getCount()/totalReviewerPapers;
+						pickedPapers += submissions
+								.getSubmissionsCount(category.getName());
+						coverage += (float) category.getCount()
+								/ totalReviewerPapers;
 					} else {
 						break;
 					}
 				}
-				if(pickedPapers > maximumNumberOfSuggestions){
-					selectedCategories.remove(selectedCategories.size()-1);
+				if (pickedPapers > maximumNumberOfSuggestions) {
+					selectedCategories.remove(selectedCategories.size() - 1);
 				}
+
+				// Output both to reviewer file and bid file
+				FileWriter bidFile = new FileWriter("bids/"
+						+ reviewer.getName() + ".txt");
+				bidFile.write("Bids of " + reviewer.getName() + "\n");
 
 				for (Category category : selectedCategories) {
 					System.out.println("\t" + category.getName() + "\t"
@@ -131,7 +138,20 @@ public class TwoPhaseClassifier {
 							.getSubmissionsOfCategory(category.getName())) {
 						outputFile.write(paperNumber + "\t");
 					}
+
+					bidFile.write("Topic: " + category.getName() + "\n");
+					for (String file : submissions
+							.getSubmissionFilesByCategory(category.getName())) {
+						bidFile.write(file + "\n");
+						bidFile
+								.write("Abstract:\n"
+										+ loadAbstractForFile(file));
+						bidFile.write("\n");
+					}
+					bidFile.write("\n\n");
 				}
+				bidFile.close();
+
 				outputFile.write("\n");
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -142,6 +162,24 @@ public class TwoPhaseClassifier {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private String loadAbstractForFile(String file) {
+		StringBuffer temp = new StringBuffer();
+		try {
+			FileReader reader = new FileReader(
+					"plaintext/automaticBidding/submissions/" + file);
+			BufferedReader bufferedReader = new BufferedReader(reader);
+			String line;
+			while ((line = bufferedReader.readLine()) != null) {
+				temp.append(line + "\n");
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return temp.toString();
 	}
 
 	public String getFileContent(File file) throws FileNotFoundException {
