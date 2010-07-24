@@ -126,6 +126,7 @@ public abstract class DocumentClassifier implements Serializable {
 						if (documentName.endsWith(".pdf")) {
 							try {
 								content = textStripper.getContent(document);
+								content = textStripper.cleanContent(content);
 							} catch (Exception e) {
 								e.printStackTrace();
 							}

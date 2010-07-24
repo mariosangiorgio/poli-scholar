@@ -32,7 +32,7 @@ public class Submissions {
 	}
 
 	public Collection<Integer> getSubmissionsOfCategory(String categoryName) {
-		Pattern icsmFilename = Pattern.compile("icsm2010_submission_(\\d*)");
+		Pattern icsmFilename = Pattern.compile("\\w*\\d\\d\\d\\d_submission_(\\d*)");
 		Vector<Integer> result = new Vector<Integer>();
 		Collection<String> categoryPaper = submissions.get(categoryName);
 		if (categoryPaper == null) {
@@ -46,7 +46,19 @@ public class Submissions {
 		}
 		return result;
 	}
-
+	
+	public Collection<String> getSubmissionFilesByCategory(String categoryName){
+		Collection<String> files = new Vector<String>();
+		Collection<String> categoryPaper = submissions.get(categoryName);
+		if (categoryPaper == null) {
+			return files;
+		}
+		else{
+			files.addAll(categoryPaper);
+		}
+		return files;
+	}
+	
 	public int getTotalSubmissions() {
 		int sum = 0;
 		for (String category : submissions.keySet()) {

@@ -19,14 +19,14 @@ public class Statistics {
 		Session session = HibernateSessionManager.getNewSession();
 		session.beginTransaction();
 
-		int firstYear = 1992;
-		int lastYear = 2009;
+		int firstYear = 1975;
+		int lastYear = 2010;
 		int step = 3;
 
 		HashMap<String, Vector<Float>> table;
 		table = new HashMap<String, Vector<Float>>();
 		
-		String journalName = "ACM Transactions on Software Engineering and Methodology";
+		String journalName = "IEEE Transactions on Software Engineering";
 
 		Journal journal = (Journal) session.getNamedQuery("findJournalByName")
 		.setParameter("journalName", journalName).uniqueResult();

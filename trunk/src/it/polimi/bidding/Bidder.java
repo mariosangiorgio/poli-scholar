@@ -53,8 +53,12 @@ public abstract class Bidder implements Serializable{
 			if (!documentName.startsWith(".") && document.isFile()) {
 				try {
 					System.out.println(documentName);
-					String fullText = (new TextStripper()).getContent(document);
-					String reviewer = getReviewer(fullText);
+					
+					TextStripper textStripper = new TextStripper();
+					String content = textStripper.getContent(document);
+					content = textStripper.cleanContent(content);
+					
+					String reviewer = getReviewer(content);
 					System.out.println("Selected reviewer:\t"+reviewer+"\n\n");
 					
 					biddings.add(new Bidding(documentName, reviewer));
