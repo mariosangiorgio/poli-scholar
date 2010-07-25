@@ -2,9 +2,11 @@ package it.polimi.bidding;
 
 import it.polimi.utils.TextStripper;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -54,9 +56,24 @@ public abstract class Bidder implements Serializable{
 				try {
 					System.out.println(documentName);
 					
-					TextStripper textStripper = new TextStripper();
-					String content = textStripper.getContent(document);
-					content = textStripper.cleanContent(content);
+					String content = null;
+					if (documentName.endsWith(".pdf")) {
+						TextStripper textStripper = new TextStripper();
+						content = textStripper.getContent(document);
+						content = textStripper.cleanContent(content);
+					}
+					if (documentName.endsWith(".txt")) {
+						FileReader reader = new FileReader(document);
+						BufferedReader fileReader = new BufferedReader(reader);
+						StringBuffer buffer = new StringBuffer();
+						String temp;
+						while((temp = fileReader.readLine()) != null){
+							buffer.append(temp+"\n");
+						}
+						content = buffer.toString();
+						reader.close();
+						fileReader.close();
+					}
 					
 					String reviewer = getReviewer(content);
 					System.out.println("Selected reviewer:\t"+reviewer+"\n\n");

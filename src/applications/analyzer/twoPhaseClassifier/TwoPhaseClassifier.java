@@ -24,24 +24,24 @@ public class TwoPhaseClassifier {
 		File file = new File(classifierFile);
 
 		if (train || !file.exists()) {
-			twoPhaseClassifier = TwoPhaseClassifier.train("plaintext/model",
+			twoPhaseClassifier = TwoPhaseClassifier.train("papers/abstracts/model",
 					classifierFile);
 		} else {
 			twoPhaseClassifier = TwoPhaseClassifier.load(classifierFile);
 		}
 
 		twoPhaseClassifier
-				.classifySubmissions("plaintext/automaticBidding/submissions");
+				.classifySubmissions("papers/abstracts/submissions");
 		int minimumNumberOfPapers = 20;
 		int maximumNumberOfPapers = (int) Math.floor(.5d * twoPhaseClassifier
 				.getTotalSubmissions());
 		float topicCoverage = .75f;
 		twoPhaseClassifier.classifyReviewers(
-				"plaintext/automaticBidding/reviewers", topicCoverage,
+				"papers/abstracts/reviewers", topicCoverage,
 				minimumNumberOfPapers, maximumNumberOfPapers);
 	}
 
-	private int getTotalSubmissions() {
+	public int getTotalSubmissions() {
 		return submissions.getTotalSubmissions();
 	}
 
@@ -58,7 +58,7 @@ public class TwoPhaseClassifier {
 		return twoPhaseClassifier;
 	}
 
-	private static TwoPhaseClassifier load(String classifierFile) {
+	public static TwoPhaseClassifier load(String classifierFile) {
 		TwoPhaseClassifier twoPhaseClassifier = new TwoPhaseClassifier();
 		twoPhaseClassifier.classifier = BayesianDocumentClassifier
 				.load(classifierFile);
@@ -168,7 +168,7 @@ public class TwoPhaseClassifier {
 		StringBuffer temp = new StringBuffer();
 		try {
 			FileReader reader = new FileReader(
-					"plaintext/automaticBidding/submissions/" + file);
+					"papers/abstracts/submissions/" + file);
 			BufferedReader bufferedReader = new BufferedReader(reader);
 			String line;
 			while ((line = bufferedReader.readLine()) != null) {

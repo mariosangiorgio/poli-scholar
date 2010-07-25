@@ -13,14 +13,14 @@ public class ExtractAbstracts {
 	
 	public static void main(String[] args) throws IOException,
 			PDFEncryptedException {
-		String root = "automaticBidding/submissions/";
+		String root = "papers/fulltext/submissions/";
 		new ExtractAbstracts().convert(root);
 	}
 
 	public void convert(String root){
 		System.out.println("Converting the content of: "+root);
 		File sourceFolder = new File(root);
-		File destinationFolder = new File("plaintext/" + root);
+		File destinationFolder = new File(root.replace("papers/fulltext/","papers/abstracts/"));
 		if (!destinationFolder.exists()) {
 			destinationFolder.mkdirs();
 		}
@@ -37,8 +37,9 @@ public class ExtractAbstracts {
 
 			String paperAbstract;
 			try {
-				String outputFilename = "plaintext/" + root + "/"
+				String outputFilename = root + "/"
 						+ filename.replace(".pdf", ".txt");
+				outputFilename = outputFilename.replace("papers/fulltext/","papers/abstracts/");
 				if(new File(outputFilename).exists()){
 					continue;
 				}
