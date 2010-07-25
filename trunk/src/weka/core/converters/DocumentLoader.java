@@ -2,7 +2,9 @@ package weka.core.converters;
 
 import it.polimi.utils.TextStripper;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -36,7 +38,7 @@ public class DocumentLoader extends TextDirectoryLoader {
 				try {
 					File txt = new File(directoryPath + File.separator
 							+ subdirPath + File.separator + files[j]);
-					if(files[j].startsWith(".") || !txt.isFile()){
+					if (files[j].startsWith(".") || !txt.isFile()) {
 						continue;
 					}
 					fileCount++;
@@ -49,30 +51,37 @@ public class DocumentLoader extends TextDirectoryLoader {
 						newInst = new double[3];
 					else
 						newInst = new double[2];
-					
-					/*					
-					BufferedInputStream is;
-					is = new BufferedInputStream(new FileInputStream(txt));
-					StringBuffer txtStr = new StringBuffer();
-					int c;
-					while ((c = is.read()) != -1) {
-						txtStr.append((char) c);
-					}
-					*/
-					
+
 					System.out.println(txt);
-					
-					TextStripper textStripper = new TextStripper();
-					String content = textStripper.getContent(txt);
-					content = textStripper.cleanContent(content);
-					
-					newInst[0] = (double) data.attribute(0).addStringValue(content);
+
+					String content = null;
+					if (txt.getAbsolutePath().endsWith(".pdf")) {
+						TextStripper textStripper = new TextStripper();
+						content = textStripper.getContent(txt);
+						content = textStripper.cleanContent(content);
+					}
+					if (txt.getAbsolutePath().endsWith(".txt")) {
+						FileReader reader = new FileReader(txt);
+						BufferedReader fileReader = new BufferedReader(reader);
+						StringBuffer buffer = new StringBuffer();
+						String temp;
+						while((temp = fileReader.readLine()) != null){
+							buffer.append(temp+"\n");
+						}
+						content = buffer.toString();
+						reader.close();
+						fileReader.close();
+					}
+
+
+					newInst[0] = (double) data.attribute(0).addStringValue(
+							content);
 					if (m_OutputFilename)
 						newInst[1] = (double) data.attribute(1).addStringValue(
 								subdirPath + File.separator + files[j]);
 					newInst[data.classIndex()] = (double) k;
 					data.add(new DenseInstance(1.0, newInst));
-					//is.close();
+					// is.close();
 				} catch (Exception e) {
 					System.err.println("failed to convert file: "
 							+ directoryPath + File.separator + subdirPath

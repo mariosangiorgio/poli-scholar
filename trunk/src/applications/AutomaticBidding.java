@@ -1,44 +1,66 @@
 package applications;
 
-import it.polimi.bidding.BayesianBidder;
-import it.polimi.bidding.Bidder;
-import it.polimi.bidding.Bidding;
-import it.polimi.bidding.BiddingMethods;
-import it.polimi.bidding.NearestNeighborBidder;
+import java.io.File;
+
+import applications.analyzer.twoPhaseClassifier.TwoPhaseClassifier;
+import gnu.getopt.Getopt;
+import gnu.getopt.LongOpt;
 
 public class AutomaticBidding {
 	public static void main(String[] args) throws Exception {
-		String pathToReviewers = "automaticBidding/reviewers";
-		String pathToSubmissions = "automaticBidding/submissions";
+		LongOpt longOptions[] = new LongOpt[8];
+		longOptions[0] = new LongOpt("extractAbstracts", LongOpt.NO_ARGUMENT, null, 'e');
+		longOptions[1] = new LongOpt("getBids", LongOpt.NO_ARGUMENT, null, 'b');
 
-		String filename = "automaticBidding/savedBidder";
-		boolean load = false;
+		Getopt options = new Getopt("automatic-bidding", args, "", longOptions);
+		boolean  extractAbstracts = false;
+		boolean  getBids = false;
 		
-		BiddingMethods method = BiddingMethods.VectorSpaceModel;
-		
-		// TODO: write a menu to select the bidder
-		
-		Bidder bidder;
-		if (load) {
-			bidder = Bidder.load(filename);
-		} else {
-			// Uncomment the bidder you want to use
-			switch (method) {
-			case NaiveBayesian:
-				bidder = new BayesianBidder();
+		while (options.getopt() != -1) {
+			int option = options.getLongind();
+			switch (option) {
+			case 0:
+				extractAbstracts = true;
 				break;
-			case VectorSpaceModel:
-				bidder = new NearestNeighborBidder(5);
-				break;
-			default:
-				bidder = null;
+			case 1:
+				getBids = true;
 				break;
 			}
-			bidder.train(pathToReviewers);
-			bidder.save(filename);
 		}
-		for (Bidding bidding : bidder.getReviewers(pathToSubmissions)) {
-			System.out.println(bidding + "\n");
+		if(extractAbstracts == getBids){
+			System.out.println("ERROR");
+			System.out.println("To extract abstracts from the submissions use --extracAbstracts");
+			System.out.println("To get the bids use --getBids");
+		}
+		if(extractAbstracts){
+			String root = "papers/fulltext/submissions/";
+			new ExtractAbstracts().convert(root);
+			return;
+		}
+		if(getBids){
+			TwoPhaseClassifier twoPhaseClassifier = null;
+
+			String classifierFile = "classifier";
+			boolean train = false;
+			File file = new File(classifierFile);
+
+			if (train || !file.exists()) {
+				twoPhaseClassifier = TwoPhaseClassifier.train("papers/abstracts/model",
+						classifierFile);
+			} else {
+				twoPhaseClassifier = TwoPhaseClassifier.load(classifierFile);
+			}
+
+			twoPhaseClassifier
+					.classifySubmissions("papers/abstracts/submissions");
+			int minimumNumberOfPapers = 20;
+			int maximumNumberOfPapers = (int) Math.floor(.5d * twoPhaseClassifier
+					.getTotalSubmissions());
+			float topicCoverage = .75f;
+			twoPhaseClassifier.classifyReviewers(
+					"papers/abstracts/reviewers", topicCoverage,
+					minimumNumberOfPapers, maximumNumberOfPapers);
+			return;
 		}
 	}
 }
