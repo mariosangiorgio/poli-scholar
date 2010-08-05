@@ -2,6 +2,9 @@ package applications;
 
 import gnu.getopt.Getopt;
 import gnu.getopt.LongOpt;
+import it.polimi.analyzer.BayesianDocumentClassifier;
+import it.polimi.analyzer.DocumentClassifier;
+import it.polimi.analyzer.DocumentClassifierType;
 import it.polimi.data.hibernate.HibernateSessionManager;
 import it.polimi.data.hibernate.entities.Article;
 import it.polimi.data.hibernate.entities.Classification;
@@ -14,9 +17,6 @@ import java.util.Iterator;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
-import applications.analyzer.BayesianDocumentClassifier;
-import applications.analyzer.DocumentClassifier;
-import applications.analyzer.DocumentClassifierType;
 
 public class Classifier {
 
