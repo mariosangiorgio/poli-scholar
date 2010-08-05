@@ -13,6 +13,7 @@ public class ExtractAbstracts {
 	
 	public static void main(String[] args) throws IOException,
 			PDFEncryptedException {
+		//TODO: refactor in order to reveive the root folder as parameter
 		String root = "papers/fulltext/submissions/";
 		new ExtractAbstracts().convert(root);
 	}
