@@ -17,5 +17,9 @@ public class Paper {
 	public String getContent() {
 		return content;
 	}
-
+	
+	public float getDistance(Paper paper){
+		//TODO: Implement
+		return 0f;
+	}
 }
