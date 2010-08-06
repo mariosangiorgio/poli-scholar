@@ -9,38 +9,38 @@ import java.io.File;
 import java.util.Collection;
 import java.util.Vector;
 
-public class MakeBids {
+public class Bidder {
 	private DocumentClassifier classifier;
 	private PaperCollection sumbittedPapers = new PaperCollection();
-	private Collection<AuthorProfile> authorProfiles = new Vector<AuthorProfile>();
+	private Collection<AuthorPapers> authorProfiles = new Vector<AuthorPapers>();
+	private Collection<AuthorPapers> suggestions = new Vector<AuthorPapers>();
 
-	public static void main(String[] args) throws NotADirectoryException {
-		// Application settings
-		boolean train = false;
-		String classifierFile = "classifier";
-		String submissionAbstractPaths = "papers/abstracts/submissions";
-		String reviewersAbstractsPaths = "papers/abstracts/reviewers";
+	public void generateBids(float topicCoverage, int numberOfPapersToPick) {
+		for (AuthorPapers authorPapers : authorProfiles) {
+			Collection<String> selectedTopics = authorPapers
+					.getMostRelevantTopics(topicCoverage);
 
-		MakeBids bidder = new MakeBids();
+			int totalSelectedPapers = 0;
+			for (String topic : selectedTopics) {
+				totalSelectedPapers += authorPapers.getNumberOfPapers(topic);
+			}
 
-		bidder.loadClassifier(train, classifierFile);
-		
-		bidder.groupSubmissions(submissionAbstractPaths);
-		// TODO: output submission groups
-		
-		bidder.generateAuthorProfiles(reviewersAbstractsPaths);
-		// TODO: output reviewers' profiles
-		
-		bidder.generateBids();
-		// TODO: suggest submissions according to the profile
+			AuthorPapers suggestion = new AuthorPapers(authorPapers
+					.getAuthorName());
+			for (String topic : selectedTopics) {
+				int paperOfTheTopic = authorPapers.getNumberOfPapers(topic);
+				int papersToPick = numberOfPapersToPick * paperOfTheTopic
+						/ totalSelectedPapers;
+
+				Collection<Paper> selectedPapers = authorPapers.pickTopPapers(
+						topic, sumbittedPapers.getPapers(topic), papersToPick);
+				suggestion.addSubmissions(topic, selectedPapers);
+			}
+			suggestions.add(suggestion);
+		}
 	}
 
-	private void generateBids() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private void loadClassifier(boolean train, String classifierFile) {
+	public void loadClassifier(boolean train, String classifierFile) {
 		classifierFile = "classifier";
 		File file = new File(classifierFile);
 
@@ -54,7 +54,7 @@ public class MakeBids {
 		}
 	}
 
-	private void groupSubmissions(String submissionAbstractPaths)
+	public void groupSubmissions(String submissionAbstractPaths)
 			throws NotADirectoryException {
 		File submissionsDirectory = new File(submissionAbstractPaths);
 		for (Paper paper : PaperLoader.getFilesContent(submissionsDirectory)) {
@@ -63,12 +63,12 @@ public class MakeBids {
 		}
 	}
 
-	private void generateAuthorProfiles(String reviewersAbstractsPaths)
+	public void generateAuthorProfiles(String reviewersAbstractsPaths)
 			throws NotADirectoryException {
 		File reviewerDirectory = new File(reviewersAbstractsPaths);
 		for (File authorDirectory : PaperLoader
 				.getSubDirectories(reviewerDirectory)) {
-			AuthorProfile profile = new AuthorProfile(authorDirectory.getName());
+			AuthorPapers profile = new AuthorPapers(authorDirectory.getName());
 			for (Paper paper : PaperLoader.getFilesContent(authorDirectory)) {
 				String category = classifier.classify(paper.getContent());
 				sumbittedPapers.addSubmission(category, paper);
