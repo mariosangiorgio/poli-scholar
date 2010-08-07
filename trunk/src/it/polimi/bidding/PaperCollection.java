@@ -39,7 +39,9 @@ public class PaperCollection {
 	}
 	
 	public Collection<String> getCategories(){
-		return groupedPapers.keySet();
+		Collection<String> categories = new Vector<String>();
+		categories.addAll(groupedPapers.keySet());
+		return categories;
 	}
 	
 	public int getNumberOfPapers(String category){

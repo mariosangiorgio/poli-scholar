@@ -1,10 +1,10 @@
 package it.polimi.bidding;
 
 public class PaperWithRank {
-	private Paper paper;
-	private float rank;
+	private Paper	paper;
+	private double	rank;
 	
-	public PaperWithRank(Paper paper, float rank) {
+	public PaperWithRank(Paper paper, double rank) {
 		this.paper = paper;
 		this.rank = rank;
 	}
@@ -13,7 +13,7 @@ public class PaperWithRank {
 		return paper;
 	}
 	
-	public float getRank(){
+	public double getRank(){
 		return rank;
 	}
 }

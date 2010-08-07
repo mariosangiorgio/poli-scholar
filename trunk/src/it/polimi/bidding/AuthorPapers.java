@@ -63,7 +63,7 @@ public class AuthorPapers extends PaperCollection {
 			);
 		
 		for (Paper paper : submittedPapers) {
-			float rank = 0;
+			double rank = 0;
 			for (Paper authorPaper : papersOfTheTopic) {
 				rank += paper.getDistance(authorPaper);
 			}
@@ -73,6 +73,9 @@ public class AuthorPapers extends PaperCollection {
 
 		Collection<Paper> pickedPapers = new Vector<Paper>();
 		for (int i = 0; i < papersToPick; i++) {
+			if(rankedPapers.size() == 0){
+				return pickedPapers;
+			}
 			pickedPapers.add(rankedPapers.pollFirst().getPaper());
 		}
 

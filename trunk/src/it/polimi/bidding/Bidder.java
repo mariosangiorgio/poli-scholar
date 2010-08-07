@@ -16,6 +16,7 @@ public class Bidder {
 	private Collection<AuthorPapers> suggestions = new Vector<AuthorPapers>();
 
 	public void generateBids(float topicCoverage, int numberOfPapersToPick) {
+		//TODO: reiterate adding a category if the system is not able to find 20 papers
 		for (AuthorPapers authorPapers : authorProfiles) {
 			Collection<String> selectedTopics = authorPapers
 					.getMostRelevantTopics(topicCoverage);
@@ -71,7 +72,7 @@ public class Bidder {
 			AuthorPapers profile = new AuthorPapers(authorDirectory.getName());
 			for (Paper paper : PaperLoader.getFilesContent(authorDirectory)) {
 				String category = classifier.classify(paper.getContent());
-				sumbittedPapers.addSubmission(category, paper);
+				profile.addSubmission(category, paper);
 			}
 			authorProfiles.add(profile);
 		}

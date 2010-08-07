@@ -3,11 +3,14 @@ package it.polimi.bidding;
 public class Paper {
 	private String name;
 	private String content;
+	private static VectorSpaceModel vectorSpaceModel = new VectorSpaceModel();
 
 	public Paper(String name, String content) {
 		name = name.substring(0, name.length()-4);
 		this.name = name;
 		this.content = name + "\n\n" + content;
+		//Adding the instance to the vector space model dataset
+		vectorSpaceModel.addNewInstance(content);
 	}
 	
 	public String getName(){
@@ -18,8 +21,7 @@ public class Paper {
 		return content;
 	}
 	
-	public float getDistance(Paper paper){
-		//TODO: Implement
-		return 0f;
+	public double getDistance(Paper paper){
+		return vectorSpaceModel.getDistance(content,paper.content);
 	}
 }
