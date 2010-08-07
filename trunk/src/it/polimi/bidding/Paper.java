@@ -22,6 +22,6 @@ public class Paper {
 	}
 	
 	public double getDistance(Paper paper){
-		return vectorSpaceModel.getDistance(content,paper.content);
+		return vectorSpaceModel.getCosine(content,paper.content);
 	}
 }

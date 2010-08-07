@@ -1,6 +1,9 @@
 package applications;
 
+import java.io.File;
+
 import it.polimi.bidding.Bidder;
+import it.polimi.bidding.OutputWriter;
 import it.polimi.data.io.NotADirectoryException;
 
 public class MakeBids {
@@ -10,20 +13,37 @@ public class MakeBids {
 		String classifierFile = "classifier";
 		String submissionAbstractPaths = "papers/abstracts/submissions";
 		String reviewersAbstractsPaths = "papers/abstracts/reviewers";
-		float topicCoverage = .75f;
+		float topicCoverage = .85f;
 		int numberOfPapersToPick = 20;
+
+		//Output to file
+		String outputDirectoryName			= "results";
+		String submissionGroupOutputFile	= outputDirectoryName+"/papersByTopic.txt";
+		String profilesOutputDirectory		= outputDirectoryName+"/profiles";
+		String suggestionFolder				= outputDirectoryName+"/bids";
+		OutputWriter outputWriter = new OutputWriter();
+		File outputDirectory = new File(outputDirectoryName);
+		if(!outputDirectory.exists()){
+			outputDirectory.mkdirs();
+		}
 
 		Bidder bidder = new Bidder();
 
 		bidder.loadClassifier(train, classifierFile);
 
+		System.out.println("Grouping submitted papers");
 		bidder.groupSubmissions(submissionAbstractPaths);
-		// TODO: output submission groups
-
+		outputWriter.writeGroupedSubmission(submissionGroupOutputFile,bidder.getGroupedSubmissions());
+		System.out.println("DONE. Groups are stored in the "+submissionGroupOutputFile+" file\n");
+		
+		System.out.println("Generating reviewers' profiles");
 		bidder.generateAuthorProfiles(reviewersAbstractsPaths);
-		// TODO: output reviewers' profiles
+		outputWriter.writeAuthorProfiles(profilesOutputDirectory,bidder.getUserProfiles(),topicCoverage);		
+		System.out.println("DONE. Profiles are available in the the "+profilesOutputDirectory+" directory\n");
 
+		System.out.println("Generating bid suggestions");
 		bidder.generateBids(topicCoverage, numberOfPapersToPick);
-		// TODO: suggest submissions according to the profile
+		outputWriter.writeAuthorSuggestions(suggestionFolder,bidder.getSuggestions());		
+		System.out.println("DONE. Suggested bids are available in the the "+suggestionFolder+" directory");
 	}
 }

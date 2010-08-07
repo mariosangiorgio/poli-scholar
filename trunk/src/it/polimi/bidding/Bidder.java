@@ -11,7 +11,7 @@ import java.util.Vector;
 
 public class Bidder {
 	private DocumentClassifier classifier;
-	private PaperCollection sumbittedPapers = new PaperCollection();
+	private PaperCollection submittedPapers = new PaperCollection();
 	private Collection<AuthorPapers> authorProfiles = new Vector<AuthorPapers>();
 	private Collection<AuthorPapers> suggestions = new Vector<AuthorPapers>();
 
@@ -34,7 +34,7 @@ public class Bidder {
 						/ totalSelectedPapers;
 
 				Collection<Paper> selectedPapers = authorPapers.pickTopPapers(
-						topic, sumbittedPapers.getPapers(topic), papersToPick);
+						topic, submittedPapers.getPapers(topic), papersToPick);
 				suggestion.addSubmissions(topic, selectedPapers);
 			}
 			suggestions.add(suggestion);
@@ -60,7 +60,7 @@ public class Bidder {
 		File submissionsDirectory = new File(submissionAbstractPaths);
 		for (Paper paper : PaperLoader.getFilesContent(submissionsDirectory)) {
 			String category = classifier.classify(paper.getContent());
-			sumbittedPapers.addSubmission(category, paper);
+			submittedPapers.addSubmission(category, paper);
 		}
 	}
 
@@ -76,5 +76,17 @@ public class Bidder {
 			}
 			authorProfiles.add(profile);
 		}
+	}
+
+	public PaperCollection getGroupedSubmissions() {
+		return submittedPapers;
+	}
+
+	public Collection<AuthorPapers> getUserProfiles() {
+		return authorProfiles;
+	}
+
+	public Collection<AuthorPapers> getSuggestions() {
+		return suggestions;
 	}
 }

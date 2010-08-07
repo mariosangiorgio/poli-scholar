@@ -1,9 +1,10 @@
 package it.polimi.bidding;
 
+import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 
 import weka.core.Attribute;
-import weka.core.CosineDistance;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -15,19 +16,21 @@ public class VectorSpaceModel {
 	private Instances dataSet;
 	private Instances vectorModel;
 	private StringToWordVector converter;
-	private CosineDistance distance;
 
 	public VectorSpaceModel() {
 		initializeConverter();
 	}
 
 	private void initializeConverter() {
-		distance = new CosineDistance();
+		// Getting stopwords
+		URL stopwords = getClass().getResource(
+				"/resources/english and computer science.stoplist");
+
 		dataSet = getDataSetStructure();
-		
+
 		converter = new StringToWordVector();
 		converter.setStemmer(new SnowballStemmer("porter"));
-		converter.setUseStoplist(true);// TODO: add custom words
+		converter.setStopwords(new File(stopwords.getFile()));
 		converter.setLowerCaseTokens(true);
 		converter.setDoNotOperateOnPerClassBasis(true);
 		converter.setOutputWordCounts(true);
@@ -35,7 +38,7 @@ public class VectorSpaceModel {
 		int[] attributes = new int[1];
 		attributes[0] = 0;
 		converter.setAttributeIndicesArray(attributes);
-		
+
 		try {
 			converter.setInputFormat(dataSet);
 		} catch (Exception e) {
@@ -48,7 +51,8 @@ public class VectorSpaceModel {
 
 		ArrayList<Attribute> atts = new ArrayList<Attribute>();
 		atts.add(new Attribute("text", (ArrayList<String>) null));
-		// This creates a new attribute named text with each string as admissible value
+		// This creates a new attribute named text with each string as
+		// admissible value
 
 		structure = new Instances("Document content", atts, 0);
 
@@ -70,26 +74,42 @@ public class VectorSpaceModel {
 		dataSet.add(createNewInstance(content));
 	}
 
-	public double getDistance(String firstDocument, String secondDocument) {
-		if(vectorModel == null){
+	public double getCosine(String firstDocument, String secondDocument) {
+		if (vectorModel == null) {
 			try {
 				vectorModel = Filter.useFilter(dataSet, converter);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
-		Instance firstInstance, secondInstance;
+		Instance firstInstance = null, secondInstance = null;
 
 		try {
 			converter.input(createNewInstance(firstDocument));
+			firstInstance = converter.output();
 			converter.input(createNewInstance(secondDocument));
+			secondInstance = converter.output();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		firstInstance = converter.output();
-		secondInstance = converter.output();
+		return computeCosine(firstInstance, secondInstance);
+	}
 
-		return distance.distance(firstInstance, secondInstance);
+	private double computeCosine(Instance firstInstance, Instance secondInstance) {
+		double dotProduct = 0, normFirstInstance = 0, normSecondInstance = 0;
+
+		// This cycle starts from to skip the filename and the class information
+		for (int i = 0; i < firstInstance.numAttributes(); i++) {
+			dotProduct += firstInstance.value(i) * secondInstance.value(i);
+			normFirstInstance += firstInstance.value(i)
+					* firstInstance.value(i);
+			normSecondInstance += secondInstance.value(i)
+					* secondInstance.value(i);
+		}
+		normFirstInstance = Math.sqrt(normFirstInstance);
+		normSecondInstance = Math.sqrt(normSecondInstance);
+
+		return dotProduct / (normFirstInstance * normSecondInstance);
 	}
 }
