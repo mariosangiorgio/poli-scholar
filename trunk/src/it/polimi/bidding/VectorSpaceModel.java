@@ -1,5 +1,6 @@
 package it.polimi.bidding;
 
+
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
@@ -8,7 +9,8 @@ import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.stemmers.SnowballStemmer;
+import weka.core.stemmers.LovinsStemmer;
+import weka.core.stemmers.Stemmer;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.StringToWordVector;
 
@@ -17,19 +19,24 @@ public class VectorSpaceModel {
 	private Instances vectorModel;
 	private StringToWordVector converter;
 
-	public VectorSpaceModel() {
-		initializeConverter();
+	public VectorSpaceModel(int wordsToKeep) {
+		initializeConverter(wordsToKeep);
 	}
 
-	private void initializeConverter() {
+	private void initializeConverter(int wordsToKeep) {
 		// Getting stopwords
 		URL stopwords = getClass().getResource(
 				"/resources/english and computer science.stoplist");
 
 		dataSet = getDataSetStructure();
 
-		converter = new StringToWordVector();
-		converter.setStemmer(new SnowballStemmer("porter"));
+		converter = new StringToWordVector(wordsToKeep);
+		/*
+		 * TODO: Use Porter Stemnmer provided with the snowball package
+		 * There is the need to make it work also in packaged in a jar
+		 */
+		Stemmer stemmer = new LovinsStemmer();
+		converter.setStemmer(stemmer);
 		converter.setStopwords(new File(stopwords.getFile()));
 		converter.setLowerCaseTokens(true);
 		converter.setDoNotOperateOnPerClassBasis(true);

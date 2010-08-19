@@ -3,7 +3,9 @@ package it.polimi.bidding;
 public class Paper {
 	private String name;
 	private String content;
-	private static VectorSpaceModel vectorSpaceModel = new VectorSpaceModel();
+	//TODO: choose the best dictionary size
+	private final static int NUMBER_OF_WORDS_TO_KEEP = 20000;
+	private static VectorSpaceModel vectorSpaceModel = new VectorSpaceModel(NUMBER_OF_WORDS_TO_KEEP);
 
 	public Paper(String name, String content) {
 		name = name.substring(0, name.length()-4);

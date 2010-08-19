@@ -64,6 +64,7 @@ public class AuthorPapers extends PaperCollection {
 		
 		for (Paper paper : submittedPapers) {
 			double rank = 0;
+			// The rank is computed as the average of ranks
 			for (Paper authorPaper : papersOfTheTopic) {
 				rank += paper.getDistance(authorPaper);
 			}
@@ -76,7 +77,8 @@ public class AuthorPapers extends PaperCollection {
 			if(rankedPapers.size() == 0){
 				return pickedPapers;
 			}
-			pickedPapers.add(rankedPapers.pollFirst().getPaper());
+			// Polling last element to get the one with the highest rank value
+			pickedPapers.add(rankedPapers.pollLast().getPaper());
 		}
 
 		return pickedPapers;

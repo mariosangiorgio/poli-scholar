@@ -5,7 +5,11 @@ import it.polimi.analyzer.DocumentClassifierType;
 import it.polimi.data.io.NotADirectoryException;
 import it.polimi.data.io.PaperLoader;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Vector;
 
@@ -16,7 +20,8 @@ public class Bidder {
 	private Collection<AuthorPapers> suggestions = new Vector<AuthorPapers>();
 
 	public void generateBids(float topicCoverage, int numberOfPapersToPick) {
-		//TODO: reiterate adding a category if the system is not able to find 20 papers
+		// TODO: re-iterate adding a category if the system is not able to find
+		// 20 papers
 		for (AuthorPapers authorPapers : authorProfiles) {
 			Collection<String> selectedTopics = authorPapers
 					.getMostRelevantTopics(topicCoverage);
@@ -75,6 +80,62 @@ public class Bidder {
 				profile.addSubmission(category, paper);
 			}
 			authorProfiles.add(profile);
+		}
+	}
+
+	public void loadAuthorProfiles(String profilesDirectory,
+			String reviewersAbstractsPaths) throws NotADirectoryException {
+		authorProfiles.clear(); // Dropping computed profiles to make room for
+		// the profiles specified in the file
+		File profiles = new File(profilesDirectory);
+		File papers = new File(reviewersAbstractsPaths);
+		if (profiles.isDirectory() && papers.isDirectory()) {
+			for (File authorFile : profiles.listFiles()) {
+				try {
+					// Loading file content
+					FileReader authorProfileFile = new FileReader(authorFile);
+					BufferedReader fileReader = new BufferedReader(
+							authorProfileFile);
+
+					String authorName = fileReader.readLine();
+					authorName = authorName.substring(4,
+							authorName.length() - 4);
+
+					Collection<String> confirmedTopics = new Vector<String>();
+					String temp;
+					while ((temp = fileReader.readLine()) != null) {
+						if (!temp.equals("")) {
+							confirmedTopics.add(temp);
+						}
+					}
+
+					fileReader.close();
+					authorProfileFile.close();
+
+					// Generating new profile
+					AuthorPapers profile = new AuthorPapers(authorName);
+					File authorDirectory = new File(reviewersAbstractsPaths
+							+ "/" + authorName);
+					if (!authorDirectory.isDirectory()) {
+						throw new NotADirectoryException();
+					}
+					for (Paper paper : PaperLoader
+							.getFilesContent(authorDirectory)) {
+						String category = classifier.classify(paper
+								.getContent());
+						if (confirmedTopics.contains(category)) {
+							profile.addSubmission(category, paper);
+						}
+					}
+					authorProfiles.add(profile);
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		} else {
+			throw new NotADirectoryException();
 		}
 	}
 

@@ -9,37 +9,41 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class ExtractAbstracts {
-	private TextStripper stripper = new TextStripper(true);
+	private TextStripper stripper;
 	
-	public static void main(String[] args) throws IOException,
-			PDFEncryptedException {
-		//TODO: refactor in order to reveive the root folder as parameter
-		String root = "papers/fulltext/submissions/";
-		new ExtractAbstracts().convert(root);
+	public ExtractAbstracts(int charactersToKeep) {
+		stripper = new TextStripper(true,charactersToKeep);
+	}
+	
+	public ExtractAbstracts() {
+		stripper = new TextStripper(true);
 	}
 
-	public void convert(String root){
-		System.out.println("Converting the content of: "+root);
-		File sourceFolder = new File(root);
-		File destinationFolder = new File(root.replace("papers/fulltext/","papers/abstracts/"));
+	public static void main(String[] args) throws IOException,
+			PDFEncryptedException {
+		String root = "papers/fulltext/submissions/";
+		new ExtractAbstracts().convert(new File(root));
+	}
+
+	public void convert(File root){
+		System.out.println("Converting the content of: "+root.getPath());
+		File destinationFolder = new File(root.getPath().replace("papers/fulltext/","papers/abstracts/"));
 		if (!destinationFolder.exists()) {
 			destinationFolder.mkdirs();
 		}
-
-		for (String filename : sourceFolder.list()) {
-			if (filename.startsWith(".")) {
+		
+		for (File file : root.listFiles()) {
+			if (file.isHidden()) {
 				continue;
 			}
-			File file = new File(root +"/"+ filename);
 			if (file.isDirectory()) {
-				convert(root + filename);
+				convert(file);
 				continue;
 			}
 
 			String paperAbstract;
 			try {
-				String outputFilename = root + "/"
-						+ filename.replace(".pdf", ".txt");
+				String outputFilename = file.getPath().replace(".pdf", ".txt");
 				outputFilename = outputFilename.replace("papers/fulltext/","papers/abstracts/");
 				if(new File(outputFilename).exists()){
 					continue;
@@ -49,11 +53,11 @@ public class ExtractAbstracts {
 				extrectedAbstract.write(paperAbstract);
 				extrectedAbstract.close();
 			} catch (AbstractNotFoundException e) {
-				System.out.println("***** Abstract not found in " + filename);
+				System.out.println("***** Abstract not found in " + file.getName());
 			} catch(IOException e){
-				System.out.println("***** IOException processing " + filename);
+				System.out.println("***** IOException processing " + file.getName());
 			} catch(PDFEncryptedException e){
-				System.out.println("***** The document is encrypted: " + filename);
+				System.out.println("***** The document is encrypted: " + file.getName());
 			}
 		}
 	}
