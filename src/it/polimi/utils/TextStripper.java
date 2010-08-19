@@ -15,6 +15,24 @@ public class TextStripper {
 	private static final Pattern dash = Pattern.compile("\\-\\s*");
 	private static final Pattern multipleWhitespaces = Pattern.compile("\\s+");
 
+	private static final Pattern beginningOfTheAbstract = Pattern.compile(
+			"(abstract\\s*[\\.\\-研:\n]?\\s*)|"
+					+ "(a ?b ?s ?t ?r ?a ?c ?t\\s*[\\.\\-研:\n]?\\s*)|"
+					+ "(summary\\s*[\\.\\-研:\n]?\\s*)",
+			Pattern.CASE_INSENSITIVE);
+	private static final Pattern endOfTheAbstract = Pattern.compile(
+			"(key\\s?words\\s*[\\-研:\n]?\\s*)|"
+					+ "(i?.?\\s*introduction\\s*\n)|"
+					+ "(\\d?.?\\s*introduction\\s*\n)|"
+					+ "(\\d?.?\\s*introduction and motivations\\s*\n)|"
+					+ "(\\d?.?\\s*motivation\\s*\n)|"
+					+ "(general terms\\s*\n)|"
+					+ "(index terms\\s*[\\-研:\n]?\\s*)",
+			Pattern.CASE_INSENSITIVE);
+
+	private boolean assumeAbstractLength;
+	private int assumedAbstractLength;
+
 	private boolean stripAbstract = false;
 
 	public TextStripper() {
@@ -22,6 +40,13 @@ public class TextStripper {
 
 	public TextStripper(boolean stripAbstract) {
 		this.stripAbstract = stripAbstract;
+		this.assumeAbstractLength = false;
+	}
+
+	public TextStripper(boolean stripAbstract, int assumedAbstractLength) {
+		this.stripAbstract = stripAbstract;
+		this.assumeAbstractLength = true;
+		this.assumedAbstractLength = assumedAbstractLength;
 	}
 
 	public String getContent(File document) throws AbstractNotFoundException,
@@ -59,7 +84,11 @@ public class TextStripper {
 			PDFTextStripper stripper = new PDFTextStripper();
 			stripper.setSuppressDuplicateOverlappingText(false);
 			stripper.setSpacingTolerance(0.5f);
-			stripper.writeText(fullTextDocument, writer);
+			try {
+				stripper.writeText(fullTextDocument, writer);
+			} catch (RuntimeException e) {
+				throw new IOException();
+			}
 			writer.close();
 
 			fullText = writer.toString();
@@ -91,28 +120,26 @@ public class TextStripper {
 	}
 
 	public String getAbstract(String fullText) throws AbstractNotFoundException {
-		Matcher startOfAbstractMatcher = Pattern.compile(
-				"abstract\\s*[\\.\\-研:\n]?\\s*", Pattern.CASE_INSENSITIVE)
+		Matcher startOfAbstractMatcher = beginningOfTheAbstract
 				.matcher(fullText);
-		Matcher endOfAbstractMatcher = Pattern.compile(
-				"(keywords\\s*[\\-研:\n]?\\s*)|"
-						+ "(i?.?\\s*introduction\\s*\n)|"
-						+ "(index terms\\s*[\\-研:\n]?\\s*)",
-				Pattern.CASE_INSENSITIVE).matcher(fullText);
-
-		/*
-		 * TODO: Manage when the keywords are mentioned not as a section name
-		 * but it the title or in the body of the abstract
-		 */
+		Matcher endOfAbstractMatcher = endOfTheAbstract.matcher(fullText);
+		
 		if (startOfAbstractMatcher.find()) {
 			String paperAbstract;
-			if (endOfAbstractMatcher.find()) {
-				try {
+			try {
+				if (endOfAbstractMatcher.find()) {
 					paperAbstract = fullText.substring(startOfAbstractMatcher
 							.end(), endOfAbstractMatcher.start() - 1);
 					return paperAbstract;
-				} catch (RuntimeException e) {
 				}
+				if (assumeAbstractLength) {
+					paperAbstract = fullText.substring(startOfAbstractMatcher
+							.end(), startOfAbstractMatcher.end()
+							+ assumedAbstractLength);
+					return paperAbstract;
+
+				}
+			} catch (RuntimeException e) {
 			}
 
 		}
