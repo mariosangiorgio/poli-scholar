@@ -108,12 +108,12 @@ public class AutomaticBidding {
 		System.out.println("To extract the abstracts use:");
 		System.out.println("\t--extractAbstracts");
 		System.out
-				.println("\t--maxAbstractLength=NUMBER_OF_CHARACTERS\t(Optional)");
+				.println("\t--maxAbstractLength=N\t(Optional)");
 		System.out.println();
 		System.out.println("To perform the analysis use:");
 		System.out.println("\t--analyze");
-		System.out.println("\t--train\t\t(Optional)");
-		System.out.println("\t--loadProfiles\t(Optional)");
+		System.out.println("\t--train\t\t\t(Optional)");
+		System.out.println("\t--loadProfiles\t\t(Optional)");
 		System.out.println("\t--groupSubmissions\t(Optional)");
 		System.out.println("\t--getSuggestions\t(Optional)");
 	}
