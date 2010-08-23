@@ -47,6 +47,15 @@ public class AuthorPapers extends PaperCollection {
 	public Collection<Paper> pickTopPapers(String topic,
 			Collection<Paper> submittedPapers, int papersToPick) {
 		Collection<Paper> papersOfTheTopic = getPapers(topic);
+		
+		if(papersOfTheTopic.size() == 0){
+			/*
+			 * If the author specifed the interest for a paper that is not in his profile
+			 * the distance will be computed with respect to all the papers of the profile
+			 */
+			papersOfTheTopic = getAllPapers();
+		}
+		
 		TreeSet<PaperWithRank> rankedPapers = new TreeSet<PaperWithRank>(
 				new Comparator<PaperWithRank>(){
 					@Override
@@ -82,5 +91,13 @@ public class AuthorPapers extends PaperCollection {
 		}
 
 		return pickedPapers;
+	}
+
+	private Collection<Paper> getAllPapers() {
+		Collection<Paper> papers = new Vector<Paper>();
+		for(String topic : getCategories()){
+			papers.addAll(getPapers(topic));
+		}
+		return papers;
 	}
 }
