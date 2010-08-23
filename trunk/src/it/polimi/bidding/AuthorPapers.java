@@ -7,9 +7,15 @@ import java.util.Vector;
 
 public class AuthorPapers extends PaperCollection {
 	private String authorName;
+	private Collection<String> selectedTopics;
 
 	public AuthorPapers(String authorName) {
 		this.authorName = authorName;
+		selectedTopics = new Vector<String>();
+	}
+	
+	public void addSelectedTopic(String topic){
+		selectedTopics.add(topic);
 	}
 
 	public String getAuthorName() {
@@ -17,6 +23,9 @@ public class AuthorPapers extends PaperCollection {
 	}
 
 	public Collection<String> getMostRelevantTopics(float topicCoverage) {
+		if(selectedTopics.size() != 0){
+			return selectedTopics;
+		}
 		Collection<String> mostRelevantTopics = new Vector<String>();
 
 		Collection<String> availableCategories = getCategories();

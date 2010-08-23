@@ -57,7 +57,7 @@ public class MakeBids {
 		}
 		if (loadEditedProfiles) {
 			System.out.println("Loading profiles from files");
-			bidder.loadAuthorProfiles(profilesDirectory,
+			bidder.loadAuthorTopics(profilesDirectory,
 					reviewersAbstractsPaths);
 			System.out.println("DONE. Profiles loaded from "
 					+ profilesDirectory + "\n");

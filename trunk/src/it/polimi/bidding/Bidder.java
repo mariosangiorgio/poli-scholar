@@ -20,7 +20,8 @@ public class Bidder {
 	private Collection<AuthorPapers> suggestions = new Vector<AuthorPapers>();
 
 	public void generateBids(float topicCoverage, int numberOfPapersToPick) {
-		// TODO: re-iterate adding a category if the system is not able to find 20 papers
+		// TODO: re-iterate adding a category if the system is not able to find
+		// 20 papers
 		for (AuthorPapers authorPapers : authorProfiles) {
 			Collection<String> selectedTopics = authorPapers
 					.getMostRelevantTopics(topicCoverage);
@@ -34,9 +35,17 @@ public class Bidder {
 					.getAuthorName());
 			for (String topic : selectedTopics) {
 				int paperOfTheTopic = authorPapers.getNumberOfPapers(topic);
-				int papersToPick = numberOfPapersToPick * paperOfTheTopic
-						/ totalSelectedPapers;
+				int papersToPick = 0;
+				if (totalSelectedPapers != 0) {
+					papersToPick = numberOfPapersToPick * paperOfTheTopic
+							/ totalSelectedPapers;
+				}
 
+				if (papersToPick == 0) {
+					// Artificially increasing this number in order to have the
+					// topic shown up in the results
+					papersToPick = 3;
+				}
 				Collection<Paper> selectedPapers = authorPapers.pickTopPapers(
 						topic, submittedPapers.getPapers(topic), papersToPick);
 				suggestion.addSubmissions(topic, selectedPapers);
@@ -82,20 +91,20 @@ public class Bidder {
 		}
 	}
 
-	public void loadAuthorProfiles(String profilesDirectory,
+	public void loadAuthorTopics(String profilesDirectory,
 			String reviewersAbstractsPaths) throws NotADirectoryException {
-		authorProfiles.clear(); // Dropping computed profiles to make room for
+		generateAuthorProfiles(reviewersAbstractsPaths);
 		// the profiles specified in the file
 		File profiles = new File(profilesDirectory);
 		File papers = new File(reviewersAbstractsPaths);
 		if (profiles.isDirectory() && papers.isDirectory()) {
 			for (File authorFile : profiles.listFiles()) {
 				try {
-					if(!authorFile.isFile() || authorFile.isHidden()){
+					if (!authorFile.isFile() || authorFile.isHidden()) {
 						continue;
 					}
 					// Loading file content
-					System.out.println("Loading: "+authorFile.getName());
+					System.out.println("Loading: " + authorFile.getName());
 					FileReader authorProfileFile = new FileReader(authorFile);
 					BufferedReader fileReader = new BufferedReader(
 							authorProfileFile);
@@ -103,34 +112,21 @@ public class Bidder {
 					String authorName = fileReader.readLine();
 					authorName = authorName.substring(4,
 							authorName.length() - 4);
-
-					Collection<String> confirmedTopics = new Vector<String>();
+					
+					AuthorPapers authorProfile = null;
+					for(AuthorPapers author : authorProfiles){
+						if(author.getAuthorName().equals(authorName)){
+							authorProfile = author;
+							break;
+						}
+					}
+					
 					String temp;
 					while ((temp = fileReader.readLine()) != null) {
 						if (!temp.equals("")) {
-							confirmedTopics.add(temp);
+							authorProfile.addSelectedTopic(temp);
 						}
 					}
-
-					fileReader.close();
-					authorProfileFile.close();
-
-					// Generating new profile
-					AuthorPapers profile = new AuthorPapers(authorName);
-					File authorDirectory = new File(reviewersAbstractsPaths
-							+ "/" + authorName);
-					if (!authorDirectory.isDirectory()) {
-						throw new NotADirectoryException();
-					}
-					for (Paper paper : PaperLoader
-							.getFilesContent(authorDirectory)) {
-						String category = classifier.classify(paper
-								.getContent());
-						if (confirmedTopics.contains(category)) {
-							profile.addSubmission(category, paper);
-						}
-					}
-					authorProfiles.add(profile);
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				} catch (IOException e) {
