@@ -8,7 +8,7 @@ import java.io.File;
 
 public class AutomaticBidding {
 	public static void main(String[] args) {
-		System.err.close();
+		//System.err.close();
 
 		LongOpt longOptions[] = new LongOpt[8];
 		longOptions[0] = new LongOpt("extractAbstracts", LongOpt.NO_ARGUMENT,
@@ -64,6 +64,7 @@ public class AutomaticBidding {
 				break;
 			case 6:
 				getSuggestions = true;
+				break;
 			}
 		}
 		if (extractAbstract == analyze) {

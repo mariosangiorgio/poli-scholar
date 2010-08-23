@@ -22,8 +22,8 @@ public class MakeBids {
 
 	// Output to file
 	private String outputDirectoryName = "results";
-	private String submissionGroupOutputFile = outputDirectoryName
-			+ "/papersByTopic.txt";
+	private String submissionGroupOutputDirectory = outputDirectoryName
+			+ "/submissionsByTopic";
 	private String profilesDirectory = outputDirectoryName + "/profiles";
 	private String suggestionFolder = outputDirectoryName + "/bids";
 
@@ -66,10 +66,10 @@ public class MakeBids {
 		if (groupSubmissions || getSuggestions) {
 			System.out.println("Grouping submitted papers");
 			bidder.groupSubmissions(submissionAbstractPaths);
-			outputWriter.writeGroupedSubmission(submissionGroupOutputFile,
+			outputWriter.writeGroupedSubmission(submissionGroupOutputDirectory,
 					bidder.getGroupedSubmissions());
 			System.out.println("DONE. Groups are stored in the "
-					+ submissionGroupOutputFile + " file\n");
+					+ submissionGroupOutputDirectory + " directory\n");
 		}
 
 		if (getSuggestions) {

@@ -7,15 +7,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Reader;
 import java.io.Serializable;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Random;
 import java.util.Vector;
-
 
 import cc.mallet.classify.Classification;
 import cc.mallet.classify.Classifier;
@@ -38,7 +39,7 @@ public abstract class DocumentClassifier implements Serializable {
 
 	private Classifier classifier;
 	private Collection<String> labels;
-	
+
 	private String pathToTrainingSet;
 
 	protected abstract ClassifierTrainer<?> getTrainer();
@@ -85,15 +86,33 @@ public abstract class DocumentClassifier implements Serializable {
 		}
 	}
 
+	private String[] loadStopWords(String resourceName) {
+		try {
+		InputStream in = getClass().getResourceAsStream(resourceName);
+		Reader resourceReader = new InputStreamReader(in);
+		BufferedReader bufferedReader = new BufferedReader(resourceReader);
+		String stopWord;
+		Vector<String> stoplist = new Vector<String>();
+
+			while ((stopWord = bufferedReader.readLine()) != null) {
+				stoplist.add(stopWord);
+			}
+		bufferedReader.close();
+		resourceReader.close();
+		in.close();
+
+		String words[] = new String[stoplist.size()];
+		stoplist.toArray(words);
+		return words;
+		} catch (IOException e) {
+			return new String[0];
+		}
+	}
+
 	private InstanceList loadTrainingInstances() {
 		TextStripper textStripper = new TextStripper();
 		// Getting the stopword resource
-		URI stopwordResource = null;
-		try {
-			stopwordResource = getClass().getResource("/resources/computer science.stoplist").toURI();
-		} catch (URISyntaxException e1) {
-			e1.printStackTrace();
-		}
+		String[] stoplist = loadStopWords("/resources/computer science.stoplist");
 
 		Pipe instancePipe = new SerialPipes(new Pipe[] { new Target2Label(), // Target
 				// String -> class label
@@ -102,7 +121,9 @@ public abstract class DocumentClassifier implements Serializable {
 				new CharSequence2TokenSequence(), // Data String ->
 				// TokenSequence
 				new TokenSequenceLowercase(), // TokenSequence words lower-cased
-				(new TokenSequenceRemoveStopwords()).addStopWords(new File(stopwordResource)),// Remove stop-words from
+				(new TokenSequenceRemoveStopwords()).addStopWords(stoplist),// Remove
+				// stop-words
+				// from
 				// sequence
 				new Stemmer(), new TokenSequence2FeatureSequence(),
 				// Replace each Token with a feature index

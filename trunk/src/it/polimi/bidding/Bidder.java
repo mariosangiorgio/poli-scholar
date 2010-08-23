@@ -93,6 +93,7 @@ public class Bidder {
 			for (File authorFile : profiles.listFiles()) {
 				try {
 					// Loading file content
+					System.out.println("Loading: "+authorFile.getName());
 					FileReader authorProfileFile = new FileReader(authorFile);
 					BufferedReader fileReader = new BufferedReader(
 							authorProfileFile);
