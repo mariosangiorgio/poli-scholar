@@ -18,7 +18,7 @@ public class OutputWriter {
 				}
 				outputFile.write("*** " + topic + " ***\n");
 				for (Paper paper : papers) {
-					outputFile.write(paper.getName() + "\n");
+					outputFile.write(paper.getContent()+"\n\n");
 				}
 				outputFile.write("\n");
 			}
