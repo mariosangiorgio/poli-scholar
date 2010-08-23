@@ -8,13 +8,14 @@ import java.io.File;
 
 public class AutomaticBidding {
 	public static void main(String[] args) {
-		//System.err.close();
+		// System.err.close();
 
+		StringBuffer buffer = new StringBuffer();
 		LongOpt longOptions[] = new LongOpt[8];
 		longOptions[0] = new LongOpt("extractAbstracts", LongOpt.NO_ARGUMENT,
 				null, 'e');
 		longOptions[1] = new LongOpt("maxAbstractLength",
-				LongOpt.REQUIRED_ARGUMENT, null, 'M');
+				LongOpt.REQUIRED_ARGUMENT, buffer, 'M');
 
 		longOptions[2] = new LongOpt("analyze", LongOpt.NO_ARGUMENT, null, 'a');
 		longOptions[3] = new LongOpt("train", LongOpt.NO_ARGUMENT, null, 't');
@@ -29,7 +30,7 @@ public class AutomaticBidding {
 
 		Getopt options = new Getopt("automatic-bidding", args, "", longOptions);
 		boolean extractAbstract = false;
-		boolean maxAbstractLenghtSet = false;
+		boolean maxAbstractLengthSet = false;
 		int maxAbstractLength = 0;
 		boolean analyze = false;
 		boolean train = false;
@@ -44,8 +45,8 @@ public class AutomaticBidding {
 				extractAbstract = true;
 				break;
 			case 1:
-				maxAbstractLenghtSet = true;
-				// TODO: getParameter
+				maxAbstractLengthSet = true;
+				maxAbstractLength = Integer.parseInt(options.getOptarg());
 				break;
 			case 2:
 				analyze = true;
@@ -77,7 +78,7 @@ public class AutomaticBidding {
 			String root = "papers/fulltext/submissions/";
 
 			ExtractAbstracts extractor;
-			if (maxAbstractLenghtSet) {
+			if (maxAbstractLengthSet) {
 				extractor = new ExtractAbstracts(maxAbstractLength);
 			} else {
 				extractor = new ExtractAbstracts();
@@ -87,12 +88,14 @@ public class AutomaticBidding {
 		}
 
 		if (analyze) {
-			if(generateProfiles && loadProfiles){
-				System.out.println("ERROR: you must choose to generate or to load the profiles");
+			if (generateProfiles && loadProfiles) {
+				System.out
+						.println("ERROR: you must choose to generate or to load the profiles");
 				return;
 			}
-			if(getSuggestions && !(generateProfiles||loadProfiles)){
-				System.out.println("ERROR: to generate the suggestions you have to have authors' profiles");
+			if (getSuggestions && !(generateProfiles || loadProfiles)) {
+				System.out
+						.println("ERROR: to generate the suggestions you have to have authors' profiles");
 				return;
 			}
 			try {
@@ -108,8 +111,7 @@ public class AutomaticBidding {
 	private static void printUsage() {
 		System.out.println("To extract the abstracts use:");
 		System.out.println("\t--extractAbstracts");
-		System.out
-				.println("\t--maxAbstractLength=N\t(Optional)");
+		System.out.println("\t--maxAbstractLength=N\t(Optional)");
 		System.out.println();
 		System.out.println("To perform the analysis use:");
 		System.out.println("\t--analyze");
