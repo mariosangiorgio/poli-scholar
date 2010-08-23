@@ -20,8 +20,7 @@ public class Bidder {
 	private Collection<AuthorPapers> suggestions = new Vector<AuthorPapers>();
 
 	public void generateBids(float topicCoverage, int numberOfPapersToPick) {
-		// TODO: re-iterate adding a category if the system is not able to find
-		// 20 papers
+		// TODO: re-iterate adding a category if the system is not able to find 20 papers
 		for (AuthorPapers authorPapers : authorProfiles) {
 			Collection<String> selectedTopics = authorPapers
 					.getMostRelevantTopics(topicCoverage);
@@ -92,6 +91,9 @@ public class Bidder {
 		if (profiles.isDirectory() && papers.isDirectory()) {
 			for (File authorFile : profiles.listFiles()) {
 				try {
+					if(!authorFile.isFile() || authorFile.isHidden()){
+						continue;
+					}
 					// Loading file content
 					System.out.println("Loading: "+authorFile.getName());
 					FileReader authorProfileFile = new FileReader(authorFile);

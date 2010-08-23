@@ -3,8 +3,7 @@ package it.polimi.bidding;
 public class Paper {
 	private String name;
 	private String content;
-	//TODO: choose the best dictionary size
-	private final static int NUMBER_OF_WORDS_TO_KEEP = 20000;
+	private final static int NUMBER_OF_WORDS_TO_KEEP = 100000;
 	private static VectorSpaceModel vectorSpaceModel = new VectorSpaceModel(NUMBER_OF_WORDS_TO_KEEP);
 
 	public Paper(String name, String content) {
