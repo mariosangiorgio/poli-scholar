@@ -7,22 +7,25 @@ import java.util.Collection;
 
 public class OutputWriter {
 
-	public void writeGroupedSubmission(String submissionGroupOutputFile,
+	public void writeGroupedSubmission(String submissionGroupOutputDirectory,
 			PaperCollection groupedSubmissions) {
+		File outputDirectory = new File(submissionGroupOutputDirectory);
+		if(!outputDirectory.exists()){
+			outputDirectory.mkdirs();
+		}
 		try {
-			FileWriter outputFile = new FileWriter(submissionGroupOutputFile);
 			for (String topic : groupedSubmissions.getCategories()) {
 				Collection<Paper> papers = groupedSubmissions.getPapers(topic);
 				if(papers.size() == 0){
 					continue;
 				}
+				FileWriter outputFile = new FileWriter(outputDirectory.getPath()+"/"+topic+".txt");
 				outputFile.write("*** " + topic + " ***\n");
 				for (Paper paper : papers) {
 					outputFile.write(paper.getContent()+"\n\n");
 				}
-				outputFile.write("\n");
+				outputFile.close();
 			}
-			outputFile.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
